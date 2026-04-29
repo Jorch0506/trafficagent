@@ -341,9 +341,9 @@ function ResultsScreen({ data, url, onReset }) {
                 { label: "Potencial", value: data.potencialCrecimiento, sub: "de crecimiento", color: "#4ade80" },
                 { label: "Posts generados", value: data.posts?.length, sub: "listos para publicar", color: "#e879f9" },
               ].map(({ label, value, sub, color }) => (
-                <div key={label} style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 14, padding: 20 }}>
+                <div key={label} style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 14, padding: 20, overflow: "hidden" }}>
                   <div style={{ fontSize: 12, color: "#64748b", letterSpacing: 0.5, marginBottom: 8 }}>{label.toUpperCase()}</div>
-                  <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, color, marginBottom: 4 }}>{value}</div>
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: typeof value === "string" && value.length > 20 ? 13 : 22, color, marginBottom: 4, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{value}</div>
                   <div style={{ fontSize: 12, color: "#475569" }}>{sub}</div>
                 </div>
               ))}

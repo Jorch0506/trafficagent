@@ -4,16 +4,16 @@ import Head from "next/head";
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const PLANS = [
-  { id: "free", name: "Free", price: "$0", period: "", color: "#4ade80",
+  { id: "free", name: "Free", price: "$0", period: " USD", color: "#4ade80",
     features: ["Análisis SEO básico", "5 posts/mes", "1 directorio", "Reporte PDF"],
     cta: "Empezar gratis", limit: "Starter pack" },
-  { id: "starter", name: "Starter", price: "$29", period: "/mes", color: "#38bdf8",
+  { id: "starter", name: "Starter", price: "$29", period: " USD/mes", color: "#38bdf8",
     features: ["20 posts/mes", "10 directorios", "Blog automático", "Keywords report", "Soporte email"],
     cta: "Comenzar", limit: "Para emprendedores" },
-  { id: "growth", name: "Growth", price: "$99", period: "/mes", color: "#f59e0b",
+  { id: "growth", name: "Growth", price: "$99", period: " USD/mes", color: "#f59e0b",
     features: ["Posts ilimitados", "Directorios ilimitados", "Ads optimization", "Análisis competencia", "Soporte prioritario"],
     cta: "Escalar ahora", limit: "Para negocios", popular: true },
-  { id: "agency", name: "Agency", price: "$299", period: "/mes", color: "#e879f9",
+  { id: "agency", name: "Agency", price: "$299", period: " USD/mes", color: "#e879f9",
     features: ["Múltiples clientes", "White label", "API access", "Manager dedicado", "Reportes personalizados"],
     cta: "Contactar", limit: "Para agencias" },
 ];

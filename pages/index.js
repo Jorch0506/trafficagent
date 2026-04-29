@@ -80,7 +80,26 @@ function LandingScreen({ onStart }) {
 
       <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 48px", borderBottom: "1px solid #ffffff08", position: "relative", zIndex: 10, flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src="/caevik-logo.png" alt="CAEVIK" style={{ height: 40, width: "auto" }} />
+          <svg width="160" height="40" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="pg1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#7B61FF"/>
+            <stop offset="100%" stopColor="#00C2FF"/>
+          </linearGradient>
+        </defs>
+        <path d="M70 15 C45 15 25 35 25 60 C25 85 70 125 70 125 C70 125 115 85 115 60 C115 35 95 15 70 15 Z" fill="url(#pg1)"/>
+        <path d="M70 85 C60 85 52 78 52 70" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.6"/>
+        <path d="M70 85 C80 85 88 78 88 70" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.6"/>
+        <path d="M70 85 C55 85 43 73 43 60" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.35"/>
+        <path d="M70 85 C85 85 97 73 97 60" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.35"/>
+        <circle cx="70" cy="85" r="5" fill="white"/>
+        <polygon points="70,2 58,22 82,22" fill="#9B6FFF"/>
+        <rect x="64" y="18" width="12" height="18" fill="#9B6FFF" rx="2"/>
+        <text x="130" y="82" fontFamily="Arial Black, sans-serif" fontSize="56" fontWeight="900" fill="white" letterSpacing="4">CAEVIK</text>
+        <line x1="130" y1="100" x2="150" y2="100" stroke="#94a3b8" strokeWidth="1.5"/>
+        <text x="158" y="104" fontFamily="Arial, sans-serif" fontSize="13" fill="#94a3b8" letterSpacing="3">AI · TRAFFIC · AGENT</text>
+        <line x1="380" y1="100" x2="400" y2="100" stroke="#94a3b8" strokeWidth="1.5"/>
+      </svg>
         </div>
         <button onClick={onStart} style={{ background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 20px", cursor: "pointer" }}>
           Empezar gratis →
@@ -164,7 +183,26 @@ function FormScreen({ onSubmit, loading }) {
       <div style={{ width: "100%", maxWidth: 540, position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
-            <img src="/caevik-logo.png" alt="CAEVIK" style={{ height: 44, width: "auto" }} />
+            <svg width="180" height="48" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pg2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#7B61FF"/>
+              <stop offset="100%" stopColor="#00C2FF"/>
+            </linearGradient>
+          </defs>
+          <path d="M70 15 C45 15 25 35 25 60 C25 85 70 125 70 125 C70 125 115 85 115 60 C115 35 95 15 70 15 Z" fill="url(#pg2)"/>
+          <path d="M70 85 C60 85 52 78 52 70" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.6"/>
+          <path d="M70 85 C80 85 88 78 88 70" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.6"/>
+          <path d="M70 85 C55 85 43 73 43 60" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.35"/>
+          <path d="M70 85 C85 85 97 73 97 60" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.35"/>
+          <circle cx="70" cy="85" r="5" fill="white"/>
+          <polygon points="70,2 58,22 82,22" fill="#9B6FFF"/>
+          <rect x="64" y="18" width="12" height="18" fill="#9B6FFF" rx="2"/>
+          <text x="130" y="82" fontFamily="Arial Black, sans-serif" fontSize="56" fontWeight="900" fill="white" letterSpacing="4">CAEVIK</text>
+          <line x1="130" y1="100" x2="150" y2="100" stroke="#94a3b8" strokeWidth="1.5"/>
+          <text x="158" y="104" fontFamily="Arial, sans-serif" fontSize="13" fill="#94a3b8" letterSpacing="3">AI · TRAFFIC · AGENT</text>
+          <line x1="380" y1="100" x2="400" y2="100" stroke="#94a3b8" strokeWidth="1.5"/>
+        </svg>
           </div>
           <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 28, letterSpacing: -1, marginBottom: 8 }}>Analiza tu negocio</h2>
           <p style={{ color: "#64748b", fontSize: 15 }}>Nuestra IA genera tu plan de tráfico en 60 segundos</p>
@@ -260,7 +298,24 @@ function ResultsScreen({ data, url, onReset }) {
       <div style={{ background: "#0a1628", borderBottom: "1px solid #1e293b", padding: "20px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-            <img src="/caevik-logo.png" alt="CAEVIK" style={{ height: 36, width: "auto" }} />
+            <svg width="140" height="36" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pg3" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#7B61FF"/>
+                <stop offset="100%" stopColor="#00C2FF"/>
+              </linearGradient>
+            </defs>
+            <path d="M70 15 C45 15 25 35 25 60 C25 85 70 125 70 125 C70 125 115 85 115 60 C115 35 95 15 70 15 Z" fill="url(#pg3)"/>
+            <path d="M70 85 C60 85 52 78 52 70" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.6"/>
+            <path d="M70 85 C80 85 88 78 88 70" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.6"/>
+            <circle cx="70" cy="85" r="5" fill="white"/>
+            <polygon points="70,2 58,22 82,22" fill="#9B6FFF"/>
+            <rect x="64" y="18" width="12" height="18" fill="#9B6FFF" rx="2"/>
+            <text x="130" y="82" fontFamily="Arial Black, sans-serif" fontSize="56" fontWeight="900" fill="white" letterSpacing="4">CAEVIK</text>
+            <line x1="130" y1="100" x2="150" y2="100" stroke="#94a3b8" strokeWidth="1.5"/>
+            <text x="158" y="104" fontFamily="Arial, sans-serif" fontSize="13" fill="#94a3b8" letterSpacing="3">AI · TRAFFIC · AGENT</text>
+            <line x1="380" y1="100" x2="400" y2="100" stroke="#94a3b8" strokeWidth="1.5"/>
+          </svg>
           </div>
           <div style={{ fontSize: 13, color: "#64748b" }}>Plan generado para: <span style={{ color: "#38bdf8" }}>{url}</span></div>
         </div>

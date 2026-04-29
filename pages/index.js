@@ -80,7 +80,7 @@ function LandingScreen({ onStart }) {
 
       <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 48px", borderBottom: "1px solid #ffffff08", position: "relative", zIndex: 10, flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <svg width="160" height="40" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
+          <svg width="220" height="56" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="pg1" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#7B61FF"/>
@@ -183,7 +183,7 @@ function FormScreen({ onSubmit, loading }) {
       <div style={{ width: "100%", maxWidth: 540, position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
-            <svg width="180" height="48" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
+            <svg width="260" height="68" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="pg2" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#7B61FF"/>
@@ -298,7 +298,7 @@ function ResultsScreen({ data, url, onReset }) {
       <div style={{ background: "#0a1628", borderBottom: "1px solid #1e293b", padding: "20px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-            <svg width="140" height="36" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
+            <svg width="200" height="52" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="pg3" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#7B61FF"/>

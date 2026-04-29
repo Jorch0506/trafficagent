@@ -1,3 +1,6 @@
+// pages/api/generate.js
+// Este archivo corre en el SERVIDOR — la API key nunca se expone al navegador
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -23,14 +26,16 @@ export default async function handler(req, res) {
   }
 
   const systemPrompt = `Eres un experto en marketing digital, SEO, y generación de tráfico orgánico.
+Cuando el usuario te dé información sobre su negocio, genera un plan de tráfico REAL y ESPECÍFICO.
 Responde ÚNICAMENTE en JSON válido, sin markdown, sin backticks, sin texto extra.
+IMPORTANTE: potencialCrecimiento debe ser máximo 4 palabras (ejemplo: "Alto en 6 meses"). competencia.nivel máximo 2 palabras. competencia.oportunidad máximo 6 palabras.
 El JSON debe tener exactamente esta estructura:
 {
   "niche": "string",
   "keywordsPrimarias": ["kw1","kw2","kw3","kw4","kw5"],
   "keywordsLongTail": ["frase1","frase2","frase3"],
   "traficoEstimado": {"min": 1000, "max": 5000, "periodo": "mensual"},
-  "competencia": {"nivel": "string", "oportunidad": "string"},
+  "competencia": {"nivel": "Media", "oportunidad": "max 8 palabras aquí"},
   "posts": [
     {"red": "Instagram", "tipo": "string", "titulo": "string", "caption": "string", "hashtags": ["#h1","#h2","#h3","#h4","#h5"]},
     {"red": "Facebook", "tipo": "string", "titulo": "string", "caption": "string", "hashtags": ["#h1","#h2","#h3"]},
@@ -52,16 +57,18 @@ El JSON debe tener exactamente esta estructura:
   ],
   "accionesInmediatas": ["accion1","accion2","accion3","accion4","accion5"],
   "scoreSEO": 72,
-  "potencialCrecimiento": "string"
+  "potencialCrecimiento": "Alto en 6 meses"
 }`;
 
-  const prompt = `Analiza este negocio y genera su plan de tráfico orgánico. Sé CONCISO en los captions (máximo 100 palabras cada uno):
+  const prompt = `Analiza este negocio y genera su plan de tráfico orgánico:
 URL: ${url}
 Instagram: ${instagram || "No tiene"}
 Facebook: ${facebook || "No tiene"}
 Tipo de negocio: ${businessType || "general"}
 Descripción: ${description || "Sin descripción adicional"}
-Nicho detectado: ${niche}`;
+Nicho detectado: ${niche}
+
+Genera keywords REALES para este nicho, posts con captions REALES listos para publicar, artículos SEO con estructura real, y directorios donde REALMENTE debe aparecer este negocio.`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -97,6 +104,7 @@ Nicho detectado: ${niche}`;
   }
 }
 
+// Aumentar timeout para respuestas largas de IA
 export const config = {
   api: { responseLimit: false },
 };

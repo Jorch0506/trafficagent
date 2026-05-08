@@ -3,8 +3,8 @@
 
 const PRICE_IDS = {
   starter: "price_1TSH9gJK0PaCWmjf2j4Hq5DC",
-  growth: "price_1TSHAWjK0PaCWmjfHRUHo0eF",
-  agency: "price_1TSHBMjK0PaCWmjf0PMaLQiw",
+  growth: "price_1TSHAWJK0PaCWmjfHRUHo0eF",
+  agency: "price_1TSHBMJK0PaCWmjf0PMaLQiw",
 };
 
 export default async function handler(req, res) {

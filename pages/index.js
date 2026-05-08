@@ -1,17 +1,21 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
+import { createClient } from "@supabase/supabase-js";
 
-// --- Data ---
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 const PLANS = [
   { id: "free", name: "Free", price: "$0", period: " USD", color: "#4ade80",
-    features: ["Analisis SEO basico", "5 posts/mes", "1 directorio", "Reporte PDF"],
+    features: ["1 analisis/mes", "5 posts listos", "1 directorio", "Keywords basicas"],
     cta: "Empezar gratis", limit: "Starter pack" },
   { id: "starter", name: "Starter", price: "$29", period: " USD/mes", color: "#38bdf8",
-    features: ["20 posts/mes", "10 directorios", "Blog automatico", "Keywords report", "Soporte email"],
+    features: ["20 analisis/mes", "20 posts listos", "10 directorios", "Blog automatico", "Soporte email"],
     cta: "Comenzar", limit: "Para emprendedores" },
   { id: "growth", name: "Growth", price: "$99", period: " USD/mes", color: "#f59e0b",
-    features: ["Posts ilimitados", "Directorios ilimitados", "Ads optimization", "Analisis competencia", "Soporte prioritario"],
+    features: ["Analisis ilimitados", "Posts ilimitados", "Directorios ilimitados", "Ads optimization", "Soporte prioritario"],
     cta: "Escalar ahora", limit: "Para negocios", popular: true },
   { id: "agency", name: "Agency", price: "$299", period: " USD/mes", color: "#e879f9",
     features: ["Multiples clientes", "White label", "API access", "Manager dedicado", "Reportes personalizados"],
@@ -28,25 +32,15 @@ const STEPS = [
   { id: 7, label: "Preparando tu plan de trafico...", icon: "🚀" },
 ];
 
-// --- Shared UI ---
-
 function GlowOrb({ x, y, color = "#38bdf8", size = 300, opacity = 0.12 }) {
   return (
-    <div style={{
-      position: "absolute", left: x, top: y, width: size, height: size,
-      borderRadius: "50%", background: color, opacity,
-      filter: `blur(${size * 0.4}px)`, pointerEvents: "none", zIndex: 0,
-    }} />
+    <div style={{ position: "absolute", left: x, top: y, width: size, height: size, borderRadius: "50%", background: color, opacity, filter: `blur(${size * 0.4}px)`, pointerEvents: "none", zIndex: 0 }} />
   );
 }
 
 function Tag({ children, color = "#38bdf8" }) {
   return (
-    <span style={{
-      background: color + "22", color, border: `1px solid ${color}44`,
-      borderRadius: 6, padding: "2px 10px", fontSize: 12, fontWeight: 600,
-      fontFamily: "monospace", letterSpacing: 1, display: "inline-block",
-    }}>{children}</span>
+    <span style={{ background: color + "22", color, border: `1px solid ${color}44`, borderRadius: 6, padding: "2px 10px", fontSize: 12, fontWeight: 600, fontFamily: "monospace", letterSpacing: 1, display: "inline-block" }}>{children}</span>
   );
 }
 
@@ -58,8 +52,7 @@ function ScoreRing({ score }) {
     <div style={{ position: "relative", width: 110, height: 110, margin: "0 auto 12px" }}>
       <svg width={110} height={110} style={{ transform: "rotate(-90deg)" }}>
         <circle cx={55} cy={55} r={r} fill="none" stroke="#ffffff11" strokeWidth={8} />
-        <circle cx={55} cy={55} r={r} fill="none" stroke={color} strokeWidth={8}
-          strokeDasharray={`${fill} ${circ}`} strokeLinecap="round" />
+        <circle cx={55} cy={55} r={r} fill="none" stroke={color} strokeWidth={8} strokeDasharray={`${fill} ${circ}`} strokeLinecap="round" />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
         <span style={{ fontSize: 26, fontWeight: 800, color, fontFamily: "monospace" }}>{score}</span>
@@ -73,8 +66,7 @@ const LogoSVG = ({ id = "pg", width = 200, height = 52 }) => (
   <svg width={width} height={height} viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#7B61FF" />
-        <stop offset="100%" stopColor="#00C2FF" />
+        <stop offset="0%" stopColor="#7B61FF" /><stop offset="100%" stopColor="#00C2FF" />
       </linearGradient>
     </defs>
     <path d="M70 15 C45 15 25 35 25 60 C25 85 70 125 70 125 C70 125 115 85 115 60 C115 35 95 15 70 15 Z" fill={`url(#${id})`} />
@@ -92,28 +84,86 @@ const LogoSVG = ({ id = "pg", width = 200, height = 52 }) => (
   </svg>
 );
 
-// --- Landing ---
+function AuthModal({ onClose, onSuccess }) {
+  const [mode, setMode] = useState("register");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-function LandingScreen({ onStart }) {
+  const handleSubmit = async () => {
+    if (!email || !password) { setError("Completa todos los campos"); return; }
+    setLoading(true); setError("");
+    try {
+      if (mode === "register") {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+      onSuccess();
+    } catch (err) {
+      setError(err.message || "Error de autenticacion");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inp = { width: "100%", background: "#0f172a", border: "1px solid #1e293b", borderRadius: 10, color: "#e2e8f0", fontSize: 15, padding: "14px 16px", fontFamily: "'DM Sans', sans-serif", outline: "none", boxSizing: "border-box" };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }}>
+      <div style={{ background: "#0a1628", border: "1px solid #1e293b", borderRadius: 20, padding: 36, width: "100%", maxWidth: 420, position: "relative" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", color: "#64748b", fontSize: 20, cursor: "pointer" }}>✕</button>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>🚀</div>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, color: "#e2e8f0", marginBottom: 8 }}>
+            {mode === "register" ? "Guarda tu plan gratis" : "Bienvenido de vuelta"}
+          </h2>
+          <p style={{ color: "#64748b", fontSize: 14 }}>
+            {mode === "register" ? "Crea tu cuenta para guardar resultados y generar mas planes" : "Accede a tus analisis guardados"}
+          </p>
+        </div>
+        <div style={{ display: "flex", background: "#0f172a", borderRadius: 10, padding: 4, marginBottom: 20 }}>
+          {["register", "login"].map(m => (
+            <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", background: mode === m ? "linear-gradient(135deg, #38bdf8, #818cf8)" : "transparent", color: mode === m ? "#fff" : "#64748b" }}>
+              {m === "register" ? "Crear cuenta" : "Iniciar sesion"}
+            </button>
+          ))}
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" style={inp}
+            onFocus={e => e.target.style.borderColor = "#38bdf8"} onBlur={e => e.target.style.borderColor = "#1e293b"}
+            onKeyDown={e => e.key === "Enter" && handleSubmit()} />
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Contrasena (min 6 caracteres)" style={inp}
+            onFocus={e => e.target.style.borderColor = "#38bdf8"} onBlur={e => e.target.style.borderColor = "#1e293b"}
+            onKeyDown={e => e.key === "Enter" && handleSubmit()} />
+        </div>
+        {error && <div style={{ background: "#f8717122", border: "1px solid #f8717144", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#f87171", marginBottom: 16 }}>{error}</div>}
+        <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", padding: "15px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 700, fontSize: 15, cursor: "pointer", opacity: loading ? 0.7 : 1 }}>
+          {loading ? "Cargando..." : mode === "register" ? "Crear cuenta gratis →" : "Entrar →"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LandingScreen({ onStart, user, onLogout }) {
   const [loadingPlan, setLoadingPlan] = useState(null);
 
   const handlePlanClick = async (planId) => {
     if (planId === "free") { onStart(); return; }
     setLoadingPlan(planId);
     try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planId }),
-      });
+      const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: planId }) });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
       else alert("Error al procesar el pago. Intenta de nuevo.");
-    } catch {
-      alert("Error de conexion. Intenta de nuevo.");
-    } finally {
-      setLoadingPlan(null);
-    }
+    } catch { alert("Error de conexion. Intenta de nuevo."); }
+    finally { setLoadingPlan(null); }
   };
 
   return (
@@ -121,35 +171,24 @@ function LandingScreen({ onStart }) {
       <GlowOrb x="-100px" y="-100px" color="#38bdf8" size={500} opacity={0.08} />
       <GlowOrb x="60%" y="20%" color="#e879f9" size={400} opacity={0.06} />
       <GlowOrb x="20%" y="70%" color="#4ade80" size={300} opacity={0.07} />
-
       <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 48px", borderBottom: "1px solid #ffffff08", position: "relative", zIndex: 10, flexWrap: "wrap", gap: 12 }}>
         <LogoSVG id="pg1" width={220} height={56} />
-        <button onClick={onStart} style={{ background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 20px", cursor: "pointer" }}>
-          Empezar gratis →
-        </button>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          {user && <><span style={{ fontSize: 13, color: "#64748b" }}>{user.email}</span><button onClick={onLogout} style={{ background: "transparent", border: "1px solid #1e293b", borderRadius: 8, color: "#94a3b8", fontSize: 13, padding: "8px 16px", cursor: "pointer" }}>Salir</button></>}
+          <button onClick={onStart} style={{ background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 20px", cursor: "pointer" }}>Empezar gratis →</button>
+        </div>
       </nav>
-
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "100px 48px 60px", textAlign: "center", position: "relative", zIndex: 10 }}>
         <div style={{ display: "inline-flex", gap: 8, marginBottom: 24, flexWrap: "wrap", justifyContent: "center" }}>
-          <Tag color="#4ade80">IA-Powered</Tag>
-          <Tag color="#38bdf8">SEO Automatico</Tag>
-          <Tag color="#e879f9">100% Organico</Tag>
+          <Tag color="#4ade80">IA-Powered</Tag><Tag color="#38bdf8">SEO Automatico</Tag><Tag color="#e879f9">100% Organico</Tag>
         </div>
-
         <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(36px, 6vw, 72px)", lineHeight: 1.05, letterSpacing: -2, marginBottom: 24, background: "linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           Tu negocio merece<br />
           <span style={{ background: "linear-gradient(135deg, #38bdf8, #e879f9)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ser encontrado.</span>
         </h1>
-
-        <p style={{ fontSize: 18, color: "#94a3b8", maxWidth: 560, margin: "0 auto 48px", lineHeight: 1.7 }}>
-          Ingresa tu sitio web. Nuestra IA analiza tu nicho, genera contenido SEO, crea posts para redes sociales y te posiciona donde esta tu cliente.
-        </p>
-
-        <button onClick={onStart} style={{ background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 18, padding: "18px 48px", cursor: "pointer", boxShadow: "0 0 40px #38bdf844", letterSpacing: -0.3 }}>
-          Generar mi plan de trafico →
-        </button>
+        <p style={{ fontSize: 18, color: "#94a3b8", maxWidth: 560, margin: "0 auto 48px", lineHeight: 1.7 }}>Ingresa tu sitio web. Nuestra IA analiza tu nicho, genera contenido SEO, crea posts para redes sociales y te posiciona donde esta tu cliente.</p>
+        <button onClick={onStart} style={{ background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 18, padding: "18px 48px", cursor: "pointer", boxShadow: "0 0 40px #38bdf844" }}>Generar mi plan de trafico →</button>
         <p style={{ fontSize: 13, color: "#475569", marginTop: 14 }}>Gratis. Sin tarjeta. En 60 segundos.</p>
-
         <div style={{ display: "flex", justifyContent: "center", gap: 48, marginTop: 80, flexWrap: "wrap" }}>
           {[["10K+", "Sitios analizados"], ["3.2M", "Visitas generadas"], ["89%", "Mejora en SEO"], ["$0", "Para empezar"]].map(([num, label]) => (
             <div key={label} style={{ textAlign: "center" }}>
@@ -159,14 +198,13 @@ function LandingScreen({ onStart }) {
           ))}
         </div>
       </div>
-
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 80px", position: "relative", zIndex: 10 }}>
         <h2 style={{ textAlign: "center", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 32, marginBottom: 48, letterSpacing: -1 }}>Planes que escalan contigo</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
           {PLANS.map(plan => (
             <div key={plan.id} style={{ background: plan.popular ? `linear-gradient(135deg, ${plan.color}15, #0f172a)` : "#0f172a", border: `1px solid ${plan.popular ? plan.color + "55" : "#ffffff10"}`, borderRadius: 16, padding: "28px 24px", position: "relative", boxShadow: plan.popular ? `0 0 30px ${plan.color}22` : "none" }}>
               {plan.popular && <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: plan.color, color: "#000", fontSize: 11, fontWeight: 800, padding: "4px 14px", borderRadius: 20, letterSpacing: 1, whiteSpace: "nowrap" }}>MAS POPULAR</div>}
-              <div style={{ fontSize: 13, color: plan.color, fontWeight: 600, marginBottom: 8, letterSpacing: 1 }}>{plan.limit}</div>
+              <div style={{ fontSize: 13, color: plan.color, fontWeight: 600, marginBottom: 8 }}>{plan.limit}</div>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, marginBottom: 2 }}>{plan.name}</div>
               <div style={{ marginBottom: 20 }}>
                 <span style={{ fontFamily: "monospace", fontSize: 32, fontWeight: 700, color: plan.color }}>{plan.price}</span>
@@ -188,74 +226,42 @@ function LandingScreen({ onStart }) {
   );
 }
 
-// --- Form ---
-
 function FormScreen({ onSubmit, loading }) {
   const [form, setForm] = useState({ url: "", instagram: "", facebook: "", businessType: "ecommerce", description: "" });
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  const inputStyle = {
-    width: "100%", background: "#0f172a", border: "1px solid #1e293b", borderRadius: 10,
-    color: "#e2e8f0", fontSize: 15, padding: "14px 16px", fontFamily: "'DM Sans', sans-serif",
-    outline: "none", boxSizing: "border-box",
-  };
+  const inp = { width: "100%", background: "#0f172a", border: "1px solid #1e293b", borderRadius: 10, color: "#e2e8f0", fontSize: 15, padding: "14px 16px", fontFamily: "'DM Sans', sans-serif", outline: "none", boxSizing: "border-box" };
 
   return (
     <div style={{ minHeight: "100vh", background: "#050a14", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, position: "relative" }}>
       <GlowOrb x="0" y="0" color="#38bdf8" size={400} opacity={0.07} />
       <GlowOrb x="60%" y="60%" color="#e879f9" size={300} opacity={0.06} />
-
       <div style={{ width: "100%", maxWidth: 540, position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
-            <LogoSVG id="pg2" width={260} height={68} />
-          </div>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 28, letterSpacing: -1, marginBottom: 8 }}>Analiza tu negocio</h2>
+          <LogoSVG id="pg2" width={260} height={68} />
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 28, letterSpacing: -1, marginBottom: 8, marginTop: 16 }}>Analiza tu negocio</h2>
           <p style={{ color: "#64748b", fontSize: 15 }}>Nuestra IA genera tu plan de trafico en 60 segundos</p>
         </div>
-
         <div style={{ background: "#0a1628", border: "1px solid #1e293b", borderRadius: 20, padding: 36 }}>
-          {[
-            { key: "url", label: "🌐 URL de tu sitio web", placeholder: "https://tusitioweb.com", required: true },
-            { key: "instagram", label: "📸 Instagram (opcional)", placeholder: "@tuusuario" },
-            { key: "facebook", label: "📘 Facebook (opcional)", placeholder: "facebook.com/tupagina" },
-          ].map(({ key, label, placeholder, required }) => (
+          {[{ key: "url", label: "🌐 URL de tu sitio web", placeholder: "https://tusitioweb.com", required: true }, { key: "instagram", label: "📸 Instagram (opcional)", placeholder: "@tuusuario" }, { key: "facebook", label: "📘 Facebook (opcional)", placeholder: "facebook.com/tupagina" }].map(({ key, label, placeholder, required }) => (
             <div key={key} style={{ marginBottom: 20 }}>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#94a3b8", marginBottom: 8 }}>
-                {label} {required && <span style={{ color: "#f87171" }}>*</span>}
-              </label>
-              <input value={form[key]} onChange={e => update(key, e.target.value)} placeholder={placeholder} style={inputStyle}
-                onFocus={e => e.target.style.borderColor = "#38bdf8"}
-                onBlur={e => e.target.style.borderColor = "#1e293b"} />
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#94a3b8", marginBottom: 8 }}>{label} {required && <span style={{ color: "#f87171" }}>*</span>}</label>
+              <input value={form[key]} onChange={e => update(key, e.target.value)} placeholder={placeholder} style={inp}
+                onFocus={e => e.target.style.borderColor = "#38bdf8"} onBlur={e => e.target.style.borderColor = "#1e293b"} />
             </div>
           ))}
-
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#94a3b8", marginBottom: 8 }}>🏢 Tipo de negocio</label>
-            <select value={form.businessType} onChange={e => update("businessType", e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-              {[["ecommerce", "E-commerce / Tienda online"], ["saas", "SaaS / Aplicacion web"], ["local", "Negocio fisico / Local"], ["agency", "Agencia / Servicios"], ["general", "Otro"]].map(([v, l]) => (
-                <option key={v} value={v}>{l}</option>
-              ))}
+            <select value={form.businessType} onChange={e => update("businessType", e.target.value)} style={{ ...inp, cursor: "pointer" }}>
+              {[["ecommerce", "E-commerce / Tienda online"], ["saas", "SaaS / Aplicacion web"], ["local", "Negocio fisico / Local"], ["agency", "Agencia / Servicios"], ["general", "Otro"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </div>
-
           <div style={{ marginBottom: 28 }}>
             <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#94a3b8", marginBottom: 8 }}>📝 Describe tu negocio (opcional)</label>
-            <textarea value={form.description} onChange={e => update("description", e.target.value)}
-              placeholder="Que vendes, a quien, en que mercado..." rows={3}
-              style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6 }}
-              onFocus={e => e.target.style.borderColor = "#38bdf8"}
-              onBlur={e => e.target.style.borderColor = "#1e293b"} />
+            <textarea value={form.description} onChange={e => update("description", e.target.value)} placeholder="Que vendes, a quien, en que mercado..." rows={3}
+              style={{ ...inp, resize: "vertical", lineHeight: 1.6 }}
+              onFocus={e => e.target.style.borderColor = "#38bdf8"} onBlur={e => e.target.style.borderColor = "#1e293b"} />
           </div>
-
-          <button onClick={() => form.url && onSubmit(form)} disabled={!form.url || loading} style={{
-            width: "100%", padding: "16px",
-            background: form.url && !loading ? "linear-gradient(135deg, #38bdf8, #818cf8)" : "#1e293b",
-            border: "none", borderRadius: 10,
-            color: form.url && !loading ? "#fff" : "#475569",
-            fontWeight: 700, fontSize: 16, cursor: form.url && !loading ? "pointer" : "not-allowed",
-            boxShadow: form.url ? "0 0 30px #38bdf833" : "none",
-          }}>
+          <button onClick={() => form.url && onSubmit(form)} disabled={!form.url || loading} style={{ width: "100%", padding: "16px", background: form.url && !loading ? "linear-gradient(135deg, #38bdf8, #818cf8)" : "#1e293b", border: "none", borderRadius: 10, color: form.url && !loading ? "#fff" : "#475569", fontWeight: 700, fontSize: 16, cursor: form.url && !loading ? "pointer" : "not-allowed" }}>
             {loading ? "Generando..." : "Generar mi plan de trafico ⚡"}
           </button>
         </div>
@@ -263,8 +269,6 @@ function FormScreen({ onSubmit, loading }) {
     </div>
   );
 }
-
-// --- Loading ---
 
 function LoadingScreen({ step }) {
   return (
@@ -293,27 +297,37 @@ function LoadingScreen({ step }) {
   );
 }
 
-// --- Results ---
-
-function ResultsScreen({ data, url, onReset }) {
+function ResultsScreen({ data, url, onReset, user, onShowAuth, userPlan }) {
   const [tab, setTab] = useState("overview");
   const tabs = [["overview", "📊 Overview"], ["posts", "📱 Posts"], ["seo", "✍️ SEO"], ["directorios", "📂 Directorios"]];
+
+  const handleUpgrade = async (planId) => {
+    if (!user) { onShowAuth(); return; }
+    try {
+      const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: planId }) });
+      const d = await res.json();
+      if (d.url) window.location.href = d.url;
+      else alert("Error al procesar el pago.");
+    } catch { alert("Error de conexion."); }
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "#050a14", color: "#e2e8f0", fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ background: "#0a1628", borderBottom: "1px solid #1e293b", padding: "20px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-            <LogoSVG id="pg3" width={200} height={52} />
-          </div>
-          <div style={{ fontSize: 13, color: "#64748b" }}>Plan generado para: <span style={{ color: "#38bdf8" }}>{url}</span></div>
+          <LogoSVG id="pg3" width={200} height={52} />
+          <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Plan generado para: <span style={{ color: "#38bdf8" }}>{url}</span></div>
         </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          {user && <span style={{ fontSize: 12, color: "#64748b", background: "#0f172a", padding: "4px 12px", borderRadius: 20, border: "1px solid #1e293b" }}>Plan: {userPlan || "free"}</span>}
           <button onClick={onReset} style={{ padding: "10px 20px", background: "transparent", border: "1px solid #1e293b", borderRadius: 8, color: "#94a3b8", cursor: "pointer", fontSize: 14 }}>← Nuevo analisis</button>
-          <button onClick={async () => { try { const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: "starter" }) }); const d = await res.json(); if (d.url) window.location.href = d.url; else alert("Error al procesar el pago."); } catch { alert("Error de conexion."); } }} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Upgrade a Starter $29 →</button>
+          {!user ? (
+            <button onClick={onShowAuth} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Guardar plan gratis →</button>
+          ) : (userPlan === "free" || !userPlan) ? (
+            <button onClick={() => handleUpgrade("starter")} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Upgrade a Starter $29 →</button>
+          ) : null}
         </div>
       </div>
-
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 24px" }}>
         <div style={{ display: "flex", gap: 4, marginBottom: 32, background: "#0f172a", borderRadius: 12, padding: 4, width: "fit-content", flexWrap: "wrap" }}>
           {tabs.map(([id, label]) => (
@@ -330,14 +344,13 @@ function ResultsScreen({ data, url, onReset }) {
                 { label: "Potencial", value: data.potencialCrecimiento, sub: "de crecimiento", color: "#4ade80" },
                 { label: "Posts generados", value: data.posts?.length, sub: "listos para publicar", color: "#e879f9" },
               ].map(({ label, value, sub, color }) => (
-                <div key={label} style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 14, padding: 20, overflow: "hidden" }}>
+                <div key={label} style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 14, padding: 20 }}>
                   <div style={{ fontSize: 12, color: "#64748b", letterSpacing: 0.5, marginBottom: 8 }}>{label.toUpperCase()}</div>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: typeof value === "string" && value.length > 20 ? 13 : 22, color, marginBottom: 4, lineHeight: 1.4 }}>{value}</div>
                   <div style={{ fontSize: 12, color: "#475569" }}>{sub}</div>
                 </div>
               ))}
             </div>
-
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
               <div style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 16, padding: 24 }}>
                 <ScoreRing score={data.scoreSEO} />
@@ -353,7 +366,6 @@ function ResultsScreen({ data, url, onReset }) {
                 ))}
               </div>
             </div>
-
             <div style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 16, padding: 24 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#94a3b8", marginBottom: 16 }}>🔑 KEYWORDS PRIMARIAS</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
@@ -364,6 +376,14 @@ function ResultsScreen({ data, url, onReset }) {
                 {data.keywordsLongTail?.map(kw => <Tag key={kw} color="#818cf8">{kw}</Tag>)}
               </div>
             </div>
+            {!user && (
+              <div style={{ background: "linear-gradient(135deg, #38bdf811, #818cf811)", border: "1px solid #38bdf833", borderRadius: 16, padding: 28, textAlign: "center", marginTop: 24 }}>
+                <div style={{ fontSize: 28, marginBottom: 12 }}>💾</div>
+                <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, marginBottom: 8 }}>Guarda este plan gratis</div>
+                <div style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>Crea tu cuenta para guardar resultados y generar mas analisis cada mes.</div>
+                <button onClick={onShowAuth} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>Crear cuenta gratis →</button>
+              </div>
+            )}
           </div>
         )}
 
@@ -400,9 +420,7 @@ function ResultsScreen({ data, url, onReset }) {
                 </div>
                 <div style={{ borderTop: "1px solid #1e293b", paddingTop: 14 }}>
                   <div style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>ESTRUCTURA DEL ARTICULO</div>
-                  {art.estructura?.map((h, j) => (
-                    <div key={j} style={{ fontSize: 13, color: "#64748b", padding: "5px 0" }}>{h}</div>
-                  ))}
+                  {art.estructura?.map((h, j) => <div key={j} style={{ fontSize: 13, color: "#64748b", padding: "5px 0" }}>{h}</div>)}
                 </div>
               </div>
             ))}
@@ -428,7 +446,7 @@ function ResultsScreen({ data, url, onReset }) {
             <div style={{ background: "linear-gradient(135deg, #38bdf811, #818cf811)", border: "1px solid #38bdf822", borderRadius: 16, padding: 24, textAlign: "center" }}>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, marginBottom: 8 }}>¿Quieres que lo hagamos automaticamente?</div>
               <div style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>Con Starter, registramos tu negocio en los directorios clave de tu nicho cada mes.</div>
-              <button onClick={async () => { try { const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: "starter" }) }); const d = await res.json(); if (d.url) window.location.href = d.url; else alert("Error al procesar el pago."); } catch { alert("Error de conexion."); } }} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>Activar Starter por $29/mes →</button>
+              <button onClick={() => handleUpgrade("starter")} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>Activar Starter por $29/mes →</button>
             </div>
           </div>
         )}
@@ -437,26 +455,43 @@ function ResultsScreen({ data, url, onReset }) {
   );
 }
 
-// --- Main ---
-
 export default function Home() {
   const [screen, setScreen] = useState("landing");
   const [loadingStep, setLoadingStep] = useState(0);
   const [result, setResult] = useState(null);
   const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [userPlan, setUserPlan] = useState("free");
+  const [showAuth, setShowAuth] = useState(false);
   const intervalRef = useRef(null);
 
-  const handleFormSubmit = async (data) => {
-    setFormData(data);
-    setLoading(true);
-    setScreen("loading");
-    setLoadingStep(0);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) { setUser(session.user); fetchUserPlan(session.user.id); }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) { setUser(session.user); fetchUserPlan(session.user.id); }
+      else { setUser(null); setUserPlan("free"); }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
+  const fetchUserPlan = async (userId) => {
+    const { data } = await supabase.from("users").select("plan").eq("id", userId).single();
+    if (data) setUserPlan(data.plan);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null); setUserPlan("free"); setScreen("landing");
+  };
+
+  const handleFormSubmit = async (data) => {
+    setFormData(data); setLoading(true); setScreen("loading"); setLoadingStep(0);
     let step = 0;
     intervalRef.current = setInterval(() => {
-      step++;
-      setLoadingStep(step);
+      step++; setLoadingStep(step);
       if (step >= STEPS.length - 1) clearInterval(intervalRef.current);
     }, 900);
 
@@ -464,45 +499,43 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, userId: user?.id }),
       });
-
       clearInterval(intervalRef.current);
       setLoadingStep(STEPS.length);
-
       if (res.ok) {
         const plan = await res.json();
-        setResult(plan);
-        setScreen("results");
+        setResult(plan); setScreen("results");
       } else {
         const err = await res.json();
-        console.error("API error:", err);
-        alert("Error generando el plan. Verifica tu API key en las variables de entorno de Vercel.");
-        setScreen("form");
+        if (err.error === "limite_alcanzado") {
+          alert(`Has alcanzado tu limite de ${err.limit} analisis en tu plan ${err.plan}. Haz upgrade para continuar.`);
+          setScreen("landing");
+        } else {
+          alert("Error generando el plan. Verifica tu API key en Vercel.");
+          setScreen("form");
+        }
       }
-    } catch (err) {
+    } catch {
       clearInterval(intervalRef.current);
-      console.error("Error:", err);
       alert("Error de conexion. Intenta de nuevo.");
       setScreen("form");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
     <>
       <Head>
         <title>CAEVIK — AI Traffic Agent</title>
-        <meta name="description" content="CAEVIK es el agente de IA que hace que tu negocio sea encontrado. SEO automatico, posts para redes sociales y mas." />
+        <meta name="description" content="CAEVIK es el agente de IA que hace que tu negocio sea encontrado." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
-
-      {screen === "landing" && <LandingScreen onStart={() => setScreen("form")} />}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} onSuccess={() => { setShowAuth(false); if (result) setScreen("results"); }} />}
+      {screen === "landing" && <LandingScreen onStart={() => setScreen("form")} user={user} onLogout={handleLogout} />}
       {screen === "form" && <FormScreen onSubmit={handleFormSubmit} loading={loading} />}
       {screen === "loading" && <LoadingScreen step={loadingStep} />}
-      {screen === "results" && <ResultsScreen data={result} url={formData?.url} onReset={() => setScreen("form")} />}
+      {screen === "results" && <ResultsScreen data={result} url={formData?.url} onReset={() => setScreen("form")} user={user} onShowAuth={() => setShowAuth(true)} userPlan={userPlan} />}
     </>
   );
 }

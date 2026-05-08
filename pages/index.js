@@ -310,7 +310,7 @@ function ResultsScreen({ data, url, onReset }) {
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button onClick={onReset} style={{ padding: "10px 20px", background: "transparent", border: "1px solid #1e293b", borderRadius: 8, color: "#94a3b8", cursor: "pointer", fontSize: 14 }}>← Nuevo analisis</button>
-          <button style={{ padding: "10px 20px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Upgrade a Growth $99 →</button>
+          <button onClick={async () => { try { const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: "starter" }) }); const d = await res.json(); if (d.url) window.location.href = d.url; else alert("Error al procesar el pago."); } catch { alert("Error de conexion."); } }} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>Upgrade a Starter $29 →</button>
         </div>
       </div>
 
@@ -427,8 +427,8 @@ function ResultsScreen({ data, url, onReset }) {
             </div>
             <div style={{ background: "linear-gradient(135deg, #38bdf811, #818cf811)", border: "1px solid #38bdf822", borderRadius: 16, padding: 24, textAlign: "center" }}>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, marginBottom: 8 }}>¿Quieres que lo hagamos automaticamente?</div>
-              <div style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>Con Growth, registramos tu negocio en todos los directorios automaticamente cada mes.</div>
-              <button style={{ padding: "14px 32px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>Activar Growth por $99/mes →</button>
+              <div style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>Con Starter, registramos tu negocio en los directorios clave de tu nicho cada mes.</div>
+              <button onClick={async () => { try { const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: "starter" }) }); const d = await res.json(); if (d.url) window.location.href = d.url; else alert("Error al procesar el pago."); } catch { alert("Error de conexion."); } }} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>Activar Starter por $29/mes →</button>
             </div>
           </div>
         )}

@@ -8,10 +8,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const PLAN_LIMITS = {
-  starter: 20,
-  growth: 999,
-  agency: 999,
+const PLAN_CONFIG = {
+  starter: { analyses_limit: 20,  sites_limit: 1  },
+  growth:  { analyses_limit: 60,  sites_limit: 3  },
+  agency:  { analyses_limit: 100, sites_limit: 10 },
 };
 
 const PRICE_TO_PLAN = {
@@ -25,22 +25,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const sig = req.headers["stripe-signature"];
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   let event;
-
   try {
-    // Verificar firma del webhook
-    const body = JSON.stringify(req.body);
-
-    if (webhookSecret) {
-      // Verificacion con stripe-signature (recomendado en produccion)
-      const timestamp = sig.split(",")[0].replace("t=", "");
-      const payload = `${timestamp}.${body}`;
-      // En produccion usar: stripe.webhooks.constructEvent(body, sig, webhookSecret)
-      // Por ahora procesamos el evento directamente
-    }
-
     event = req.body;
   } catch (err) {
     console.error("Webhook error:", err.message);
@@ -49,32 +35,61 @@ export default async function handler(req, res) {
 
   try {
     switch (event.type) {
+
       case "checkout.session.completed": {
         const session = event.data.object;
         const customerEmail = session.customer_details?.email;
         const customerId = session.customer;
         const subscriptionId = session.subscription;
 
-        // Obtener el price ID de la suscripcion
-        const lineItems = session.line_items?.data || [];
-        const priceId = lineItems[0]?.price?.id || session.metadata?.price_id;
-        const plan = PRICE_TO_PLAN[priceId] || "starter";
-        const limit = PLAN_LIMITS[plan] || 20;
+        // Obtener price ID de los line items
+        let priceId = null;
+        if (session.line_items?.data?.length > 0) {
+          priceId = session.line_items.data[0]?.price?.id;
+        }
 
-        if (customerEmail) {
-          await supabase
+        const plan = PRICE_TO_PLAN[priceId] || "starter";
+        const config = PLAN_CONFIG[plan];
+
+        if (customerEmail && config) {
+          const { error } = await supabase
             .from("users")
             .update({
               plan,
               stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
-              analyses_limit: limit,
+              analyses_limit: config.analyses_limit,
+              sites_limit: config.sites_limit,
               analyses_used: 0,
               subscription_status: "active",
             })
             .eq("email", customerEmail);
 
-          console.log(`Plan actualizado: ${customerEmail} -> ${plan}`);
+          if (error) console.error("Error actualizando usuario:", error);
+          else console.log(`Plan actualizado: ${customerEmail} -> ${plan}`);
+        }
+        break;
+      }
+
+      case "customer.subscription.updated": {
+        const subscription = event.data.object;
+        const customerId = subscription.customer;
+        const priceId = subscription.items?.data?.[0]?.price?.id;
+        const plan = PRICE_TO_PLAN[priceId];
+        const config = PLAN_CONFIG[plan];
+
+        if (plan && config) {
+          await supabase
+            .from("users")
+            .update({
+              plan,
+              analyses_limit: config.analyses_limit,
+              sites_limit: config.sites_limit,
+              subscription_status: subscription.status === "active" ? "active" : "inactive",
+            })
+            .eq("stripe_customer_id", customerId);
+
+          console.log(`Plan actualizado por cambio: ${customerId} -> ${plan}`);
         }
         break;
       }
@@ -88,6 +103,7 @@ export default async function handler(req, res) {
           .update({
             plan: "free",
             analyses_limit: 1,
+            sites_limit: 1,
             subscription_status: "cancelled",
             stripe_subscription_id: null,
           })
@@ -107,6 +123,25 @@ export default async function handler(req, res) {
           .eq("stripe_customer_id", customerId);
 
         console.log(`Pago fallido: ${customerId}`);
+        break;
+      }
+
+      case "invoice.payment_succeeded": {
+        const invoice = event.data.object;
+        const customerId = invoice.customer;
+
+        // Resetear contador de analisis al inicio de cada ciclo de facturacion
+        if (invoice.billing_reason === "subscription_cycle") {
+          await supabase
+            .from("users")
+            .update({
+              analyses_used: 0,
+              subscription_status: "active",
+            })
+            .eq("stripe_customer_id", customerId);
+
+          console.log(`Contador reseteado para nuevo ciclo: ${customerId}`);
+        }
         break;
       }
 

@@ -3,3 +3,98 @@ body { background: #050a14; color: #e2e8f0; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.5 } }
 @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* ============================================
+   CAEVIK DESIGN TOKENS
+   Base del sistema de diseño — no editar valores
+   individuales, cambiar siempre desde aquí.
+   ============================================ */
+
+:root {
+
+  /* --- Colores de marca --- */
+  --brand-primary:     #38bdf8;   /* azul principal */
+  --brand-secondary:   #818cf8;   /* violeta */
+  --brand-accent:      #e879f9;   /* magenta */
+  --brand-success:     #4ade80;   /* verde */
+  --brand-warning:     #f59e0b;   /* ámbar */
+  --brand-danger:      #f87171;   /* rojo */
+
+  /* --- Fondos --- */
+  --bg-base:           #050a14;   /* fondo de toda la app */
+  --bg-surface:        #0a1628;   /* cards y modales */
+  --bg-elevated:       #0f172a;   /* elementos sobre surface */
+  --bg-border:         #1e293b;   /* bordes y separadores */
+
+  /* --- Texto --- */
+  --text-primary:      #e2e8f0;   /* títulos y texto principal */
+  --text-secondary:    #94a3b8;   /* texto de apoyo */
+  --text-muted:        #64748b;   /* labels, placeholders */
+  --text-disabled:     #475569;   /* elementos deshabilitados */
+
+  /* --- Tipografía --- */
+  --font-sans:         'DM Sans', sans-serif;
+  --font-display:      'Syne', sans-serif;
+  --font-mono:         monospace;
+
+  --text-xs:           11px;
+  --text-sm:           13px;
+  --text-base:         15px;
+  --text-md:           16px;
+  --text-lg:           18px;
+  --text-xl:           22px;
+  --text-2xl:          28px;
+  --text-3xl:          36px;
+  --text-4xl:          48px;
+
+  /* --- Espaciado (base 4px) --- */
+  --space-1:           4px;
+  --space-2:           8px;
+  --space-3:           12px;
+  --space-4:           16px;
+  --space-5:           20px;
+  --space-6:           24px;
+  --space-8:           32px;
+  --space-10:          40px;
+  --space-12:          48px;
+  --space-16:          64px;
+  --space-20:          80px;
+
+  /* --- Radios de borde --- */
+  --radius-sm:         6px;
+  --radius-md:         10px;
+  --radius-lg:         14px;
+  --radius-xl:         20px;
+  --radius-full:       9999px;
+
+  /* --- Sombras de foco (accesibilidad) --- */
+  --focus-ring:        0 0 0 2px var(--brand-primary);
+  --focus-ring-offset: 0 0 0 4px var(--bg-base);
+
+  /* --- Gradientes de marca --- */
+  --gradient-brand:    linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+  --gradient-accent:   linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+  --gradient-warm:     linear-gradient(135deg, var(--brand-warning), var(--brand-danger));
+  --gradient-agency:   linear-gradient(135deg, var(--brand-accent), var(--brand-secondary));
+
+  /* --- Transiciones --- */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms ease;
+
+}
+
+/* --- Accesibilidad: estados de foco visibles --- */
+*:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* --- Scrollbar personalizado (Webkit) --- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--bg-border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--text-disabled); }
+
+/* --- Selección de texto --- */
+::selection { background: var(--brand-primary); color: var(--bg-base); opacity: 0.3; }

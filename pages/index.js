@@ -288,7 +288,7 @@ function LoadingScreen({ step }) {
       <div style={{ textAlign: "center", position: "relative", zIndex: 10, maxWidth: 480, padding: 24 }}>
         <div style={{ fontSize: 60, marginBottom: 24 }}>⚡</div>
         <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 28, marginBottom: 8 }}>Analizando tu negocio</h2>
-        <p style={{ color: "#64748b", fontSize: 15, marginBottom: 40 }}>La IA está trabajando para ti...</p>
+        <p style={{ color: "#64748b", fontSize: 15, marginBottom: 40 }}>Esto toma entre 20 y 40 segundos. No cierres esta página.</p>
         <div style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 16, padding: 24 }}>
           {STEPS.map((s, i) => {
             const done = i < step, active = i === step;
@@ -515,7 +515,7 @@ export default function Home() {
     intervalRef.current = setInterval(() => {
       step++; setLoadingStep(step);
       if (step >= STEPS.length - 1) clearInterval(intervalRef.current);
-    }, 900);
+    }, 3500);
 
     try {
       const res = await fetch("/api/generate", {

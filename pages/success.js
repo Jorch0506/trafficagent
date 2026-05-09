@@ -1,32 +1,73 @@
+// pages/success.js
+// Página de confirmación post-pago
+// Muestra el plan activado con features reales y CTA al generador
+
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { LogoSVG } from "../components/LogoSVG";
 
 const PLAN_DETAILS = {
   starter: {
     name: "Starter",
     price: "$29 USD/mes",
     color: "#38bdf8",
-    features: ["20 análisis/mes", "20 posts listos", "10 artículos SEO", "10 directorios", "Soporte por email"],
+    emoji: "🚀",
+    tagline: "Ya puedes generar hasta 20 planes de tráfico al mes.",
+    features: [
+      "20 análisis/mes",
+      "10 posts listos para publicar",
+      "5 artículos SEO con estructura",
+      "5 directorios relevantes por análisis",
+      "5 keywords primarias + 3 long tail",
+      "Soporte por email",
+    ],
   },
   growth: {
     name: "Growth",
     price: "$99 USD/mes",
     color: "#f59e0b",
-    features: ["Análisis ilimitados", "50 posts listos", "25 artículos SEO", "Directorios ilimitados", "WhatsApp Bot 24h"],
+    emoji: "📈",
+    tagline: "Escala tu tráfico orgánico con 60 análisis al mes y 3 sitios.",
+    features: [
+      "60 análisis/mes",
+      "25 posts listos para publicar",
+      "12 artículos SEO con estructura",
+      "15 directorios relevantes por análisis",
+      "3 sitios web simultáneos",
+      "10 keywords primarias + 8 long tail",
+      "Soporte prioritario",
+    ],
   },
   agency: {
     name: "Agency",
     price: "$299 USD/mes",
     color: "#e879f9",
-    features: ["10 sitios simultáneos", "150 posts/mes", "75 artículos SEO", "White label", "Manager dedicado"],
+    emoji: "🏆",
+    tagline: "Gestiona hasta 10 sitios con 100 análisis al mes.",
+    features: [
+      "100 análisis/mes",
+      "25 posts listos por análisis",
+      "12 artículos SEO por análisis",
+      "20 directorios por análisis",
+      "10 sitios web simultáneos",
+      "Manager dedicado",
+      "API access — próximamente",
+    ],
   },
 };
+
+function GlowOrb({ x, y, color = "#38bdf8", size = 300, opacity = 0.12 }) {
+  return (
+    <div style={{ position: "absolute", left: x, top: y, width: size, height: size, borderRadius: "50%", background: color, opacity, filter: `blur(${size * 0.4}px)`, pointerEvents: "none", zIndex: 0 }} />
+  );
+}
 
 export default function Success() {
   const router = useRouter();
   const { plan } = router.query;
   const [details, setDetails] = useState(null);
+  const [countdown, setCountdown] = useState(10);
 
   useEffect(() => {
     if (plan && PLAN_DETAILS[plan]) {
@@ -34,65 +75,101 @@ export default function Success() {
     }
   }, [plan]);
 
+  // Countdown para redirigir automáticamente
+  useEffect(() => {
+    if (!details) return;
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          router.push("/");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [details]);
+
+  const planColor = details?.color || "#38bdf8";
+
   return (
     <>
       <Head>
-        <title>¡Bienvenido a CAEVIK!</title>
-        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Syne:wght@800&display=swap" rel="stylesheet" />
+        <title>¡Bienvenido a CAEVIK {details?.name || ""}!</title>
+        <meta name="description" content="Tu plan está activo. Empieza a generar tráfico orgánico ahora." />
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
-      <div style={{ minHeight: "100vh", background: "#050a14", color: "#e2e8f0", fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-        <div style={{ maxWidth: 500, width: "100%", textAlign: "center" }}>
+
+      <div style={{ minHeight: "100vh", background: "var(--bg-base)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", justifyContent: "center", padding: "var(--space-6)", position: "relative", overflow: "hidden" }}>
+        <GlowOrb x="-100px" y="-100px" color={planColor} size={500} opacity={0.08} />
+        <GlowOrb x="60%" y="60%" color="var(--brand-secondary)" size={400} opacity={0.05} />
+
+        <div style={{ maxWidth: 520, width: "100%", textAlign: "center", position: "relative", zIndex: 10 }}>
 
           {/* Logo */}
-          <svg width="200" height="52" viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 32 }}>
-            <defs>
-              <linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#7B61FF"/>
-                <stop offset="100%" stopColor="#00C2FF"/>
-              </linearGradient>
-            </defs>
-            <path d="M70 15 C45 15 25 35 25 60 C25 85 70 125 70 125 C70 125 115 85 115 60 C115 35 95 15 70 15 Z" fill="url(#pg)"/>
-            <path d="M70 85 C60 85 52 78 52 70" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.6"/>
-            <path d="M70 85 C80 85 88 78 88 70" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.6"/>
-            <circle cx="70" cy="85" r="5" fill="white"/>
-            <polygon points="70,2 58,22 82,22" fill="#9B6FFF"/>
-            <rect x="64" y="18" width="12" height="18" fill="#9B6FFF" rx="2"/>
-            <text x="130" y="82" fontFamily="Arial Black, sans-serif" fontSize="56" fontWeight="900" fill="white" letterSpacing="4">CAEVIK</text>
-          </svg>
+          <div style={{ marginBottom: "var(--space-8)" }}>
+            <LogoSVG id="success-logo" width={200} height={52} />
+          </div>
 
-          {/* Success icon */}
-          <div style={{ fontSize: 72, marginBottom: 24 }}>🎉</div>
+          {/* Icono de éxito */}
+          <div style={{ fontSize: 64, marginBottom: "var(--space-5)" }}>
+            {details?.emoji || "🎉"}
+          </div>
 
-          <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 32, marginBottom: 12, letterSpacing: -1 }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-3xl)", marginBottom: "var(--space-3)", letterSpacing: -1 }}>
             ¡Pago exitoso!
           </h1>
-          <p style={{ color: "#94a3b8", fontSize: 16, marginBottom: 32 }}>
-            Bienvenido a CAEVIK. Tu plan está activo ahora mismo.
+
+          <p style={{ color: "var(--text-muted)", fontSize: "var(--text-base)", marginBottom: "var(--space-8)", lineHeight: 1.6 }}>
+            {details?.tagline || "Tu plan está activo. Empieza a generar tráfico orgánico ahora mismo."}
           </p>
 
+          {/* Card del plan activado */}
           {details && (
-            <div style={{ background: "#0f172a", border: `1px solid ${details.color}44`, borderRadius: 20, padding: 28, marginBottom: 32, boxShadow: `0 0 30px ${details.color}22` }}>
-              <div style={{ fontSize: 13, color: details.color, fontWeight: 600, marginBottom: 8, letterSpacing: 1 }}>PLAN ACTIVO</div>
-              <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 28, marginBottom: 4 }}>{details.name}</div>
-              <div style={{ color: details.color, fontFamily: "monospace", fontSize: 20, marginBottom: 20 }}>{details.price}</div>
-              {details.features.map(f => (
-                <div key={f} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10, fontSize: 14, color: "#94a3b8", textAlign: "left" }}>
-                  <span style={{ color: details.color }}>✓</span> {f}
+            <div style={{ background: "var(--bg-surface)", border: `1px solid ${planColor}44`, borderRadius: "var(--radius-xl)", padding: "var(--space-6)", marginBottom: "var(--space-6)", boxShadow: `0 0 40px ${planColor}18`, textAlign: "left" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--space-5)" }}>
+                <div>
+                  <div style={{ fontSize: "var(--text-xs)", color: planColor, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", marginBottom: "var(--space-1)" }}>
+                    PLAN ACTIVADO
+                  </div>
+                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-2xl)", color: planColor }}>
+                    {details.name}
+                  </div>
                 </div>
-              ))}
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-lg)", fontWeight: 700, color: planColor }}>
+                  {details.price}
+                </div>
+              </div>
+
+              <div style={{ borderTop: `1px solid ${planColor}22`, paddingTop: "var(--space-4)" }}>
+                {details.features.map(f => (
+                  <div key={f} style={{ display: "flex", gap: "var(--space-3)", alignItems: "center", marginBottom: "var(--space-2)", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+                    <span style={{ color: planColor, flexShrink: 0 }}>✓</span>
+                    {f}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
+          {/* CTA principal */}
           <button
             onClick={() => router.push("/")}
-            style={{ width: "100%", padding: "16px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 16, cursor: "pointer" }}
+            style={{ width: "100%", padding: "16px", background: "var(--gradient-brand)", border: "none", borderRadius: "var(--radius-lg)", color: "#fff", fontWeight: 700, fontSize: "var(--text-lg)", cursor: "pointer", fontFamily: "var(--font-sans)", marginBottom: "var(--space-4)", boxShadow: "0 0 40px #38bdf844" }}
           >
-            Analizar mi primer sitio web →
+            Hacer mi primer análisis →
           </button>
 
-          <p style={{ fontSize: 13, color: "#475569", marginTop: 16 }}>
-            Recibirás un email de confirmación en breve. Cualquier duda escríbenos a hola@caevik.com
+          {/* Countdown */}
+          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-disabled)" }}>
+            Redirigiendo automáticamente en {countdown} segundos...
           </p>
+
+          <p style={{ fontSize: "var(--text-xs)", color: "var(--text-disabled)", marginTop: "var(--space-4)" }}>
+            Recibirás un email de confirmación en breve. Dudas: hola@caevik.com
+          </p>
+
         </div>
       </div>
     </>

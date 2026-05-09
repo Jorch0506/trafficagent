@@ -37,9 +37,17 @@ export default async function handler(req, res) {
       .eq("id", userId)
       .single();
 
-    if (error || !user) {
+    if (error) {
+      console.error("Supabase error:", JSON.stringify(error));
+      return res.status(403).json({ error: "Error consultando usuario", detail: error.message });
+    }
+
+    if (!user) {
+      console.error("Usuario no encontrado para id:", userId);
       return res.status(403).json({ error: "Usuario no encontrado" });
     }
+
+    console.log("Usuario encontrado:", user.plan, user.analyses_used, user.analyses_limit);
 
     if (user.analyses_used >= user.analyses_limit) {
       return res.status(403).json({

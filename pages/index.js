@@ -151,7 +151,7 @@ function AuthModal({ onClose, onSuccess }) {
   );
 }
 
-function LandingScreen({ onStart, user, onLogout }) {
+function LandingScreen({ onStart, user, onLogout, onShowAuth }) {
   const [loadingPlan, setLoadingPlan] = useState(null);
 
   const handlePlanClick = async (planId) => {
@@ -174,8 +174,18 @@ function LandingScreen({ onStart, user, onLogout }) {
       <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 48px", borderBottom: "1px solid #ffffff08", position: "relative", zIndex: 10, flexWrap: "wrap", gap: 12 }}>
         <LogoSVG id="pg1" width={220} height={56} />
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          {user && <><span style={{ fontSize: 13, color: "#64748b" }}>{user.email}</span><button onClick={onLogout} style={{ background: "transparent", border: "1px solid #1e293b", borderRadius: 8, color: "#94a3b8", fontSize: 13, padding: "8px 16px", cursor: "pointer" }}>Salir</button></>}
-          <button onClick={onStart} style={{ background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 20px", cursor: "pointer" }}>Empezar gratis →</button>
+          {user ? (
+            <>
+              <span style={{ fontSize: 13, color: "#64748b" }}>{user.email}</span>
+              <button onClick={onLogout} style={{ background: "transparent", border: "1px solid #1e293b", borderRadius: 8, color: "#94a3b8", fontSize: 13, padding: "8px 16px", cursor: "pointer" }}>Salir</button>
+              <button onClick={onStart} style={{ background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 20px", cursor: "pointer" }}>Nuevo analisis →</button>
+            </>
+          ) : (
+            <>
+              <button onClick={onShowAuth} style={{ background: "transparent", border: "1px solid #1e293b", borderRadius: 8, color: "#94a3b8", fontWeight: 600, fontSize: 14, padding: "10px 20px", cursor: "pointer" }}>Iniciar sesion</button>
+              <button onClick={onStart} style={{ background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 20px", cursor: "pointer" }}>Empezar gratis →</button>
+            </>
+          )}
         </div>
       </nav>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "100px 48px 60px", textAlign: "center", position: "relative", zIndex: 10 }}>
@@ -532,7 +542,7 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} onSuccess={() => { setShowAuth(false); if (result) setScreen("results"); }} />}
-      {screen === "landing" && <LandingScreen onStart={() => setScreen("form")} user={user} onLogout={handleLogout} />}
+      {screen === "landing" && <LandingScreen onStart={() => setScreen("form")} user={user} onLogout={handleLogout} onShowAuth={() => setShowAuth(true)} />}
       {screen === "form" && <FormScreen onSubmit={handleFormSubmit} loading={loading} />}
       {screen === "loading" && <LoadingScreen step={loadingStep} />}
       {screen === "results" && <ResultsScreen data={result} url={formData?.url} onReset={() => setScreen("form")} user={user} onShowAuth={() => setShowAuth(true)} userPlan={userPlan} />}

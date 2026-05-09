@@ -1,44 +1,51 @@
 // hooks/useAuth.js
-// Maneja la sesión del usuario y su plan activo
+// Maneja la sesión del usuario y sus datos completos desde Supabase
 
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
+export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 export function useAuth() {
   const [user, setUser] = useState(null);
-  const [userPlan, setUserPlan] = useState("free");
+  const [userData, setUserData] = useState(null); // datos completos de la tabla users
   const [loading, setLoading] = useState(true);
 
-  const fetchUserPlan = async (userId) => {
-    const { data } = await supabase
+  const fetchUserData = async (userId) => {
+    const { data, error } = await supabase
       .from("users")
-      .select("plan")
+      .select("plan, analyses_used, analyses_limit, subscription_status")
       .eq("id", userId)
       .single();
-    if (data) setUserPlan(data.plan);
+
+    if (error) {
+      console.error("Error fetching user data:", error);
+      return;
+    }
+    if (data) setUserData(data);
   };
 
   useEffect(() => {
+    // Obtener sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
-        fetchUserPlan(session.user.id);
+        fetchUserData(session.user.id);
       }
       setLoading(false);
     });
 
+    // Escuchar cambios de sesión
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        fetchUserPlan(session.user.id);
+        fetchUserData(session.user.id);
       } else {
         setUser(null);
-        setUserPlan("free");
+        setUserData(null);
       }
     });
 
@@ -48,10 +55,22 @@ export function useAuth() {
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    setUserPlan("free");
+    setUserData(null);
   };
 
-  return { user, userPlan, loading, logout };
-}
+  // Exponer datos individuales para conveniencia
+  const userPlan = userData?.plan || "free";
+  const analysesUsed = userData?.analyses_used ?? 0;
+  const analysesLimit = userData?.analyses_limit ?? 1;
 
-export { supabase };
+  return {
+    user,
+    userData,
+    userPlan,
+    analysesUsed,
+    analysesLimit,
+    loading,
+    logout,
+    refetchUserData: () => user?.id && fetchUserData(user.id),
+  };
+}

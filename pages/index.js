@@ -1,8 +1,4 @@
 // pages/index.js
-// Punto de entrada principal
-// Si el usuario está logueado → muestra DashboardHome
-// Si no → muestra LandingScreen
-
 import { useState, useRef } from "react";
 import Head from "next/head";
 import { useAuth } from "../hooks/useAuth";
@@ -22,7 +18,7 @@ export default function Home() {
   const [showAuth, setShowAuth] = useState(false);
   const intervalRef = useRef(null);
 
-  const { user, userPlan, logout } = useAuth();
+  const { user, userData, userPlan, logout } = useAuth();
 
   const handleFormSubmit = async (data) => {
     setFormData(data);
@@ -52,16 +48,16 @@ export default function Home() {
         const err = await res.json();
         if (err.error === "limite_alcanzado") {
           alert(`Has alcanzado tu límite de ${err.limit} análisis en tu plan ${err.plan}. Haz upgrade para continuar.`);
-          setScreen(user ? "dashboard" : "landing");
+          setScreen(user ? "landing" : "landing");
         } else {
           alert("Error generando el plan. Verifica tu API key en Vercel.");
-          setScreen(user ? "dashboard" : "form");
+          setScreen("form");
         }
       }
     } catch {
       clearInterval(intervalRef.current);
       alert("Error de conexión. Intenta de nuevo.");
-      setScreen(user ? "dashboard" : "form");
+      setScreen("form");
     } finally {
       setLoading(false);
     }
@@ -72,10 +68,6 @@ export default function Home() {
     setScreen("landing");
     setResult(null);
   };
-
-  // Si el usuario está logueado y no está en un flujo activo
-  // mostrar el dashboard en lugar de la landing
-  const showDashboard = user && screen === "landing";
 
   return (
     <>
@@ -96,18 +88,17 @@ export default function Home() {
         />
       )}
 
-      {/* Dashboard para usuario logueado en pantalla inicial */}
-      {showDashboard && (
+      {/* Usuario logueado en pantalla inicial → Dashboard */}
+      {user && screen === "landing" && (
         <DashboardHome
           user={user}
-          userPlan={userPlan}
+          userData={userData}
           onStart={() => setScreen("form")}
           onLogout={handleLogout}
-          onShowAuth={() => setShowAuth(true)}
         />
       )}
 
-      {/* Landing para visitantes sin sesión */}
+      {/* Visitante sin sesión → Landing */}
       {!user && screen === "landing" && (
         <LandingScreen
           onStart={() => setScreen("form")}
@@ -133,7 +124,7 @@ export default function Home() {
         <ResultsPanel
           data={result}
           url={formData?.url}
-          onReset={() => setScreen(user ? "dashboard" : "form")}
+          onReset={() => setScreen("landing")}
           user={user}
           userPlan={userPlan}
           onShowAuth={() => setShowAuth(true)}

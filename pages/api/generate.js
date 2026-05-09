@@ -13,7 +13,7 @@ const PLAN_LIMITS = {
   free:    { posts: 2,  articulos: 1,  directorios: 1,  keywordsPrimarias: 3,  keywordsLongTail: 1,  acciones: 3,  analyses: 1   },
   starter: { posts: 10, articulos: 5,  directorios: 5,  keywordsPrimarias: 5,  keywordsLongTail: 3,  acciones: 5,  analyses: 20  },
   growth:  { posts: 25, articulos: 12, directorios: 15, keywordsPrimarias: 10, keywordsLongTail: 8,  acciones: 10, analyses: 60  },
-  agency:  { posts: 40, articulos: 20, directorios: 30, keywordsPrimarias: 15, keywordsLongTail: 15, acciones: 15, analyses: 100 },
+  agency:  { posts: 25, articulos: 12, directorios: 20, keywordsPrimarias: 10, keywordsLongTail: 8,  acciones: 10, analyses: 100 },
 };
 
 export default async function handler(req, res) {
@@ -140,7 +140,7 @@ Genera:
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 8000,
+        max_tokens: 6000,
         system: systemPrompt,
         messages: [{ role: "user", content: prompt }],
       }),

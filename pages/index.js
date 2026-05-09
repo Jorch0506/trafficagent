@@ -1,6 +1,5 @@
 // pages/index.js
-// Punto de entrada principal
-// Incluye vista de plan guardado desde el historial
+// Sistema de errores tipados — sin alert(), mensajes inline en el formulario
 
 import { useState, useRef } from "react";
 import Head from "next/head";
@@ -12,6 +11,27 @@ import { GeneratorForm } from "../components/GeneratorForm";
 import { ResultsPanel } from "../components/ResultsPanel";
 import { DashboardHome } from "../components/DashboardHome";
 
+// Catálogo de errores tipados con título, mensaje y CTA opcional
+const ERRORS = {
+  LIMIT_REACHED: (plan, limit) => ({
+    title: "Límite del mes alcanzado",
+    message: `Has usado tus ${limit} análisis del plan ${plan}. Haz upgrade para continuar generando planes este mes.`,
+    cta: { label: "Ver planes de upgrade", action: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
+  }),
+  API_ERROR: {
+    title: "Error al generar el plan",
+    message: "Algo salió mal de nuestro lado. Intenta de nuevo en un momento.",
+  },
+  NETWORK_ERROR: {
+    title: "Sin conexión",
+    message: "Verifica tu conexión a internet e intenta de nuevo.",
+  },
+  AUTH_ERROR: {
+    title: "Sesión expirada",
+    message: "Tu sesión expiró. Vuelve a iniciar sesión para continuar.",
+  },
+};
+
 export default function Home() {
   const [screen, setScreen] = useState("landing");
   const [loadingStep, setLoadingStep] = useState(0);
@@ -20,15 +40,18 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [savedUrl, setSavedUrl] = useState(null);
+  const [formError, setFormError] = useState(null);
   const intervalRef = useRef(null);
 
   const { user, userData, userPlan, logout } = useAuth();
 
   const handleFormSubmit = async (data) => {
     setFormData(data);
+    setFormError(null);
     setLoading(true);
     setScreen("loading");
     setLoadingStep(0);
+
     let step = 0;
     intervalRef.current = setInterval(() => {
       step++;
@@ -42,8 +65,10 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, userId: user?.id }),
       });
+
       clearInterval(intervalRef.current);
       setLoadingStep(STEPS.length);
+
       if (res.ok) {
         const plan = await res.json();
         setResult(plan);
@@ -51,18 +76,20 @@ export default function Home() {
         setScreen("results");
       } else {
         const err = await res.json();
+        setScreen("form");
+
         if (err.error === "limite_alcanzado") {
-          alert(`Has alcanzado tu límite de ${err.limit} análisis en tu plan ${err.plan}. Haz upgrade para continuar.`);
-          setScreen("landing");
+          setFormError(ERRORS.LIMIT_REACHED(err.plan, err.limit));
+        } else if (err.error === "Error consultando usuario") {
+          setFormError(ERRORS.AUTH_ERROR);
         } else {
-          alert("Error generando el plan. Verifica tu API key en Vercel.");
-          setScreen("form");
+          setFormError(ERRORS.API_ERROR);
         }
       }
     } catch {
       clearInterval(intervalRef.current);
-      alert("Error de conexión. Intenta de nuevo.");
       setScreen("form");
+      setFormError(ERRORS.NETWORK_ERROR);
     } finally {
       setLoading(false);
     }
@@ -73,9 +100,9 @@ export default function Home() {
     setScreen("landing");
     setResult(null);
     setSavedUrl(null);
+    setFormError(null);
   };
 
-  // Ver un plan guardado desde el historial
   const handleViewPlan = (id, planData) => {
     setResult(planData);
     setSavedUrl(planData?.site_url || "");
@@ -125,6 +152,8 @@ export default function Home() {
         <GeneratorForm
           onSubmit={handleFormSubmit}
           loading={loading}
+          error={formError}
+          onClearError={() => setFormError(null)}
         />
       )}
 

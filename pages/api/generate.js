@@ -161,16 +161,29 @@ Genera:
     parsed._plan = userPlan;
     parsed._limits = limits;
 
-    // Incrementar contador de analisis usados
+    // Guardar en historial e incrementar contador — solo para usuarios logueados
     if (userId) {
-      await supabase.rpc("increment_analyses_used", { user_id: userId });
+      // 1. Guardar análisis con campo site_url correcto
+      const { error: insertError } = await supabase
+        .from("analyses")
+        .insert({
+          user_id: userId,
+          site_url: url,        // campo correcto en la tabla
+          plan_data: parsed,
+        });
 
-      // Guardar analisis en historial
-      await supabase.from("analyses").insert({
-        user_id: userId,
-        url,
-        plan_data: parsed,
-      });
+      if (insertError) {
+        console.error("Error guardando análisis:", insertError);
+        // No bloqueamos el response — el plan ya se generó
+      }
+
+      // 2. Incrementar contador de análisis usados
+      const { error: rpcError } = await supabase
+        .rpc("increment_analyses_used", { user_id: userId });
+
+      if (rpcError) {
+        console.error("Error incrementando contador:", rpcError);
+      }
     }
 
     return res.status(200).json(parsed);

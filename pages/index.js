@@ -1,4 +1,7 @@
 // pages/index.js
+// Punto de entrada principal
+// Incluye vista de plan guardado desde el historial
+
 import { useState, useRef } from "react";
 import Head from "next/head";
 import { useAuth } from "../hooks/useAuth";
@@ -16,6 +19,7 @@ export default function Home() {
   const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [savedUrl, setSavedUrl] = useState(null);
   const intervalRef = useRef(null);
 
   const { user, userData, userPlan, logout } = useAuth();
@@ -43,12 +47,13 @@ export default function Home() {
       if (res.ok) {
         const plan = await res.json();
         setResult(plan);
+        setSavedUrl(data.url);
         setScreen("results");
       } else {
         const err = await res.json();
         if (err.error === "limite_alcanzado") {
           alert(`Has alcanzado tu límite de ${err.limit} análisis en tu plan ${err.plan}. Haz upgrade para continuar.`);
-          setScreen(user ? "landing" : "landing");
+          setScreen("landing");
         } else {
           alert("Error generando el plan. Verifica tu API key en Vercel.");
           setScreen("form");
@@ -67,6 +72,14 @@ export default function Home() {
     await logout();
     setScreen("landing");
     setResult(null);
+    setSavedUrl(null);
+  };
+
+  // Ver un plan guardado desde el historial
+  const handleViewPlan = (id, planData) => {
+    setResult(planData);
+    setSavedUrl(planData?.site_url || "");
+    setScreen("results");
   };
 
   return (
@@ -88,17 +101,16 @@ export default function Home() {
         />
       )}
 
-      {/* Usuario logueado en pantalla inicial → Dashboard */}
       {user && screen === "landing" && (
         <DashboardHome
           user={user}
           userData={userData}
           onStart={() => setScreen("form")}
           onLogout={handleLogout}
+          onViewPlan={handleViewPlan}
         />
       )}
 
-      {/* Visitante sin sesión → Landing */}
       {!user && screen === "landing" && (
         <LandingScreen
           onStart={() => setScreen("form")}
@@ -123,7 +135,7 @@ export default function Home() {
       {screen === "results" && (
         <ResultsPanel
           data={result}
-          url={formData?.url}
+          url={savedUrl || formData?.url}
           onReset={() => setScreen("landing")}
           user={user}
           userPlan={userPlan}

@@ -1,5 +1,5 @@
 // components/ResultsPanel.jsx
-// Panel de resultados con tabs: overview, posts, SEO y directorios
+// Panel de resultados con exportación a PDF via jsPDF
 
 import { useState } from "react";
 import { LogoSVG } from "./LogoSVG";
@@ -30,9 +30,348 @@ function ScoreRing({ score }) {
   );
 }
 
+// Carga jsPDF desde CDN de forma lazy
+function loadJsPDF() {
+  return new Promise((resolve, reject) => {
+    if (window.jspdf) { resolve(window.jspdf.jsPDF); return; }
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+    script.onload = () => resolve(window.jspdf.jsPDF);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function exportToPDF(data, url) {
+  const jsPDF = await loadJsPDF();
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+  const pageW = 210;
+  const margin = 18;
+  const contentW = pageW - margin * 2;
+  let y = 20;
+
+  const colors = {
+    brand:   [56,  189, 248],
+    success: [74,  222, 128],
+    warning: [245, 158, 11],
+    accent:  [232, 121, 249],
+    dark:    [15,  23,  42],
+    gray:    [100, 116, 139],
+    light:   [226, 232, 240],
+    white:   [255, 255, 255],
+  };
+
+  const addPage = () => {
+    doc.addPage();
+    y = 20;
+  };
+
+  const checkY = (needed = 20) => {
+    if (y + needed > 270) addPage();
+  };
+
+  const drawRect = (x, ry, w, h, r, fillColor) => {
+    doc.setFillColor(...fillColor);
+    doc.roundedRect(x, ry, w, h, r, r, "F");
+  };
+
+  // ── PORTADA ──────────────────────────────────────────────────────────
+  // Fondo oscuro
+  doc.setFillColor(...colors.dark);
+  doc.rect(0, 0, 210, 297, "F");
+
+  // Gradiente simulado con rectángulos de color
+  doc.setFillColor(38, 100, 180);
+  doc.rect(0, 0, 210, 4, "F");
+
+  // Logo texto
+  doc.setTextColor(...colors.white);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(28);
+  doc.text("CAEVIK", margin, 40);
+
+  doc.setFontSize(11);
+  doc.setTextColor(...colors.gray);
+  doc.text("AI Traffic Agent", margin, 48);
+
+  // Línea decorativa
+  doc.setDrawColor(...colors.brand);
+  doc.setLineWidth(0.5);
+  doc.line(margin, 54, margin + 40, 54);
+
+  // Título del reporte
+  doc.setTextColor(...colors.white);
+  doc.setFontSize(20);
+  doc.setFont("helvetica", "bold");
+  doc.text("Plan de Tráfico Orgánico", margin, 80);
+
+  // URL analizada
+  doc.setFontSize(13);
+  doc.setTextColor(...colors.brand);
+  doc.text(url || "—", margin, 92);
+
+  // Fecha
+  doc.setFontSize(10);
+  doc.setTextColor(...colors.gray);
+  const fecha = new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
+  doc.text(`Generado el ${fecha}`, margin, 102);
+
+  // Métricas resumen en portada
+  const metrics = [
+    { label: "SEO Score", value: String(data.scoreSEO || "—"), color: colors.brand },
+    { label: "Tráfico est.", value: data.traficoEstimado ? `${(data.traficoEstimado.min/1000).toFixed(1)}K-${(data.traficoEstimado.max/1000).toFixed(1)}K/mes` : "—", color: colors.success },
+    { label: "Potencial", value: data.potencialCrecimiento || "—", color: colors.warning },
+    { label: "Posts", value: String(data.posts?.length || "—"), color: colors.accent },
+  ];
+
+  const cardW = (contentW - 9) / 2;
+  metrics.forEach((m, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const cx = margin + col * (cardW + 6);
+    const cy = 125 + row * 28;
+    drawRect(cx, cy, cardW, 22, 3, [20, 30, 50]);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...m.color);
+    doc.text(m.value, cx + 6, cy + 10);
+    doc.setFontSize(8);
+    doc.setTextColor(...colors.gray);
+    doc.text(m.label.toUpperCase(), cx + 6, cy + 17);
+  });
+
+  // Separador
+  doc.setDrawColor(...colors.brand);
+  doc.setLineWidth(0.3);
+  doc.line(margin, 195, pageW - margin, 195);
+
+  // Competencia y oportunidad
+  doc.setFontSize(10);
+  doc.setTextColor(...colors.gray);
+  doc.text("COMPETENCIA:", margin, 205);
+  doc.setTextColor(...colors.light);
+  doc.text(data.competencia?.nivel || "—", margin + 35, 205);
+  doc.setTextColor(...colors.gray);
+  doc.text("OPORTUNIDAD:", margin, 214);
+  doc.setTextColor(...colors.light);
+  const opText = doc.splitTextToSize(data.competencia?.oportunidad || "—", contentW - 40);
+  doc.text(opText, margin + 35, 214);
+
+  // Footer portada
+  doc.setFontSize(8);
+  doc.setTextColor(...colors.gray);
+  doc.text("Generado por CAEVIK · caevik.com", margin, 285);
+
+  // ── PÁGINA 2: KEYWORDS ───────────────────────────────────────────────
+  addPage();
+  doc.setFillColor(...colors.dark);
+  doc.rect(0, 0, 210, 297, "F");
+
+  const sectionTitle = (title, color = colors.brand) => {
+    checkY(14);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(...color);
+    doc.text(title, margin, y);
+    doc.setDrawColor(...color);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y + 2, margin + doc.getTextWidth(title), y + 2);
+    y += 10;
+  };
+
+  const pill = (text, x, py, bg, textColor) => {
+    const tw = doc.getTextWidth(text);
+    drawRect(x, py - 4, tw + 8, 7, 2, bg);
+    doc.setTextColor(...textColor);
+    doc.setFontSize(8);
+    doc.text(text, x + 4, py);
+    return tw + 12;
+  };
+
+  sectionTitle("Keywords Primarias");
+  if (data.keywordsPrimarias?.length) {
+    let kx = margin;
+    data.keywordsPrimarias.forEach(kw => {
+      const tw = doc.getTextWidth(kw) + 8;
+      if (kx + tw > pageW - margin) { kx = margin; y += 9; checkY(9); }
+      kx += pill(kw, kx, y, [10, 40, 70], colors.brand);
+    });
+    y += 12;
+  }
+
+  sectionTitle("Keywords Long Tail", colors.accent);
+  if (data.keywordsLongTail?.length) {
+    let kx = margin;
+    data.keywordsLongTail.forEach(kw => {
+      const tw = doc.getTextWidth(kw) + 8;
+      if (kx + tw > pageW - margin) { kx = margin; y += 9; checkY(9); }
+      kx += pill(kw, kx, y, [50, 20, 70], colors.accent);
+    });
+    y += 12;
+  }
+
+  // ── ACCIONES INMEDIATAS ───────────────────────────────────────────────
+  checkY(20);
+  sectionTitle("Acciones Inmediatas", colors.success);
+  data.accionesInmediatas?.forEach((accion, i) => {
+    checkY(16);
+    drawRect(margin, y - 4, 6, 6, 1, colors.success);
+    doc.setFontSize(8);
+    doc.setTextColor(...colors.gray);
+    doc.text(String(i + 1).padStart(2, "0"), margin + 1.5, y);
+    doc.setTextColor(...colors.light);
+    doc.setFontSize(9);
+    const lines = doc.splitTextToSize(accion, contentW - 12);
+    doc.text(lines, margin + 10, y);
+    y += lines.length * 5 + 4;
+  });
+
+  // ── PÁGINA 3+: POSTS ─────────────────────────────────────────────────
+  if (data.posts?.length) {
+    addPage();
+    doc.setFillColor(...colors.dark);
+    doc.rect(0, 0, 210, 297, "F");
+    sectionTitle("Posts para Redes Sociales", colors.accent);
+
+    data.posts.forEach((post, i) => {
+      checkY(40);
+      const redColor = post.red === "Instagram" ? colors.accent : colors.brand;
+      drawRect(margin, y - 2, contentW, 2, 0, redColor);
+      y += 4;
+
+      doc.setFontSize(8);
+      doc.setTextColor(...redColor);
+      doc.text(`${post.red?.toUpperCase()} · ${post.tipo || ""}`, margin, y);
+      doc.setFontSize(8);
+      doc.setTextColor(...colors.gray);
+      doc.text(`POST ${String(i + 1).padStart(2, "0")}`, pageW - margin - doc.getTextWidth(`POST ${String(i + 1).padStart(2, "0")}`), y);
+      y += 6;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...colors.white);
+      const titleLines = doc.splitTextToSize(post.titulo || "", contentW);
+      doc.text(titleLines, margin, y);
+      y += titleLines.length * 5 + 3;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...colors.gray);
+      const captionLines = doc.splitTextToSize(post.caption || "", contentW);
+      doc.text(captionLines, margin, y);
+      y += captionLines.length * 4 + 3;
+
+      if (post.hashtags?.length) {
+        doc.setFontSize(7.5);
+        doc.setTextColor(56, 189, 248);
+        const hashText = post.hashtags.slice(0, 5).join("  ");
+        doc.text(hashText, margin, y);
+        y += 8;
+      }
+      y += 3;
+    });
+  }
+
+  // ── ARTÍCULOS SEO ─────────────────────────────────────────────────────
+  if (data.articulosSEO?.length) {
+    addPage();
+    doc.setFillColor(...colors.dark);
+    doc.rect(0, 0, 210, 297, "F");
+    sectionTitle("Artículos SEO", colors.success);
+
+    data.articulosSEO.forEach((art, i) => {
+      checkY(35);
+      doc.setFontSize(8);
+      doc.setTextColor(...colors.gray);
+      doc.text(`ARTÍCULO ${i + 1} · /${art.slug || ""}`, margin, y);
+      y += 5;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...colors.success);
+      const artTitle = doc.splitTextToSize(art.titulo || "", contentW);
+      doc.text(artTitle, margin, y);
+      y += artTitle.length * 5 + 2;
+
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(...colors.gray);
+      const meta = doc.splitTextToSize(art.metaDescription || "", contentW);
+      doc.text(meta, margin, y);
+      y += meta.length * 4 + 3;
+
+      if (art.estructura?.length) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(...colors.light);
+        art.estructura.forEach(h => {
+          checkY(6);
+          doc.text(`  ${h}`, margin, y);
+          y += 5;
+        });
+      }
+      y += 5;
+    });
+  }
+
+  // ── DIRECTORIOS ───────────────────────────────────────────────────────
+  if (data.directorios?.length) {
+    addPage();
+    doc.setFillColor(...colors.dark);
+    doc.rect(0, 0, 210, 297, "F");
+    sectionTitle("Directorios Relevantes", colors.warning);
+
+    data.directorios.forEach((dir, i) => {
+      checkY(16);
+      const prioColor = dir.prioridad === "Alta" ? colors.success : dir.prioridad === "Media" ? colors.warning : colors.gray;
+      drawRect(margin, y - 4, contentW, 12, 2, [20, 30, 50]);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.white);
+      doc.text(dir.nombre || "", margin + 4, y);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...colors.gray);
+      doc.text(dir.url || "", margin + 4, y + 5);
+      const prioText = dir.prioridad || "—";
+      doc.setFontSize(7.5);
+      doc.setTextColor(...prioColor);
+      doc.text(prioText, pageW - margin - doc.getTextWidth(prioText) - 4, y + 2);
+      y += 16;
+    });
+  }
+
+  // Footer en todas las páginas
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFontSize(7);
+    doc.setTextColor(...colors.gray);
+    doc.text(`CAEVIK · caevik.com · Página ${p} de ${totalPages}`, margin, 291);
+  }
+
+  // Guardar
+  const filename = `caevik-plan-${(url || "sitio").replace(/https?:\/\//, "").replace(/\//g, "")}-${new Date().toISOString().slice(0, 10)}.pdf`;
+  doc.save(filename);
+}
+
 export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth }) {
   const [tab, setTab] = useState("overview");
+  const [exporting, setExporting] = useState(false);
   const tabs = [["overview", "📊 Overview"], ["posts", "📱 Posts"], ["seo", "✍️ SEO"], ["directorios", "📂 Directorios"]];
+
+  const handleExportPDF = async () => {
+    setExporting(true);
+    try {
+      await exportToPDF(data, url);
+    } catch (err) {
+      console.error("Error exportando PDF:", err);
+      alert("Error al exportar. Intenta de nuevo.");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const handleUpgrade = async (planId) => {
     if (!user) { onShowAuth(); return; }
@@ -63,7 +402,7 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
     if (userPlan === "growth") {
       return <button onClick={() => handleUpgrade("agency")} style={ctaStyle("var(--gradient-agency)")}>Activar Agency $299 →</button>;
     }
-    return <span style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", padding: "10px 20px", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)" }}>Gestionar plan →</span>;
+    return null;
   };
 
   const ctaStyle = (bg) => ({
@@ -93,6 +432,14 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
               Plan: {userPlan || "free"}
             </span>
           )}
+          {/* Botón exportar PDF */}
+          <button
+            onClick={handleExportPDF}
+            disabled={exporting}
+            style={{ padding: "10px 16px", background: "transparent", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)", color: exporting ? "var(--text-disabled)" : "var(--text-secondary)", cursor: exporting ? "not-allowed" : "pointer", fontSize: "var(--text-sm)", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: "var(--space-2)" }}
+          >
+            {exporting ? "Exportando..." : "⬇ Exportar PDF"}
+          </button>
           <button
             onClick={onReset}
             style={{ padding: "10px 20px", background: "transparent", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)", color: "var(--text-secondary)", cursor: "pointer", fontSize: "var(--text-sm)", fontFamily: "var(--font-sans)" }}

@@ -3,7 +3,7 @@
 // Tipos: welcome, plan_activated, limit_warning
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = "CAEVIK <hola@send.caevik.com>";
+const FROM_EMAIL = "CAEVIK <hola@caevik.com>";
 
 // ── Templates HTML ────────────────────────────────────────────────────────────
 

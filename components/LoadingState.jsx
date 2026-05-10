@@ -30,7 +30,7 @@ export function LoadingState({ step }) {
           Analizando tu negocio
         </h2>
         <p style={{ color: "var(--text-muted)", fontSize: "var(--text-base)", marginBottom: "var(--space-10)" }}>
-          Esto toma entre 20 y 40 segundos. No cierres esta página.
+          Esto puede tomar hasta 60 segundos. No cierres esta página.
         </p>
         <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)" }}>
           {STEPS.map((s, i) => {

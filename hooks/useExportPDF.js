@@ -3,7 +3,7 @@
 // Uso: const { exportPDF, exporting } = useExportPDF()
 
 import { useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../hooks/useAuth";
 
 export function useExportPDF() {
   const [exporting, setExporting] = useState(false);

@@ -258,7 +258,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
           <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Un plan completo, listo para publicar</h2>
           <p style={{ fontSize: 15, color: "#475569" }}>No es solo información — es contenido listo para copiar y publicar hoy.</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+        <div className="includes-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
           {[
             { icon: "📱", title: "Posts para Instagram y Facebook", desc: "Hasta 25 posts con caption completo, hashtags optimizados y tipo de contenido (educativo, testimonial, viral). Solo copia y publica.", color: "#38bdf8" },
             { icon: "✍️", title: "Artículos de blog SEO", desc: "Hasta 12 artículos con título, meta descripción, estructura H2 y palabras clave integradas. Diseñados para posicionar en Google.", color: "#4ade80" },
@@ -471,6 +471,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 8px #4ade80} 50%{opacity:0.6;box-shadow:0 0 4px #4ade80} }
         
         @media (max-width: 768px) {
+          .hero-section { padding-top: 60px !important; padding-bottom: 48px !important; padding-left: 20px !important; padding-right: 20px !important; }
           .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .hero-panel { display: none !important; }
           .steps-grid { grid-template-columns: 1fr !important; }
@@ -481,7 +482,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
           .pricing-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
           .beta-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .section-pad { padding-left: 20px !important; padding-right: 20px !important; }
-          .hero-section { padding: 80px 20px 60px !important; }
+          nav { padding: 16px 20px !important; }
           .cta-section { padding: 48px 24px !important; }
           .glass-who { padding: 32px 24px !important; }
         }

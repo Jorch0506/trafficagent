@@ -193,12 +193,23 @@ Genera exactamente:
 
           if (parsed.type === "message_stop") {
             try {
-              // FIX: limpiar y extraer solo el bloque JSON válido
+              // FIX: limpiar, extraer y reparar JSON
               const clean = fullText.replace(/```json|```/g, "").trim();
               const jsonMatch = clean.match(/\{[\s\S]*\}/);
               if (!jsonMatch) throw new Error("No se encontró JSON válido en la respuesta");
 
-              const planData = JSON.parse(jsonMatch[0]);
+              // Sanitizar caracteres problemáticos dentro de strings JSON
+              // Elimina caracteres de control que rompen el parser
+              const sanitized = jsonMatch[0]
+                .replace(/[\u0000-\u001F\u007F]/g, (c) => {
+                  // Preservar saltos de línea y tabs escapados correctamente
+                  if (c === "\n") return "\\n";
+                  if (c === "\r") return "\\r";
+                  if (c === "\t") return "\\t";
+                  return ""; // eliminar otros caracteres de control
+                });
+
+              const planData = JSON.parse(sanitized);
               planData._plan = userPlan;
               planData._limits = limits;
 

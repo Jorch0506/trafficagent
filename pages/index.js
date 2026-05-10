@@ -205,7 +205,7 @@ export default function Home() {
       )}
 
       {screen === "loading" && (
-        <LoadingState step={loadingStep} streamText={streamText} />
+        <LoadingState step={loadingStep} streamText={streamText} userPlan={userPlan} />
       )}
 
       {screen === "results" && (

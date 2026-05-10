@@ -19,6 +19,14 @@ export function AuthModal({ onClose, onSuccess }) {
       if (mode === "register") {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
+
+        // Email de bienvenida — fire and forget, no bloquea el flujo
+        fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "welcome", to: email }),
+        }).catch(() => {}); // silencioso si falla
+
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;

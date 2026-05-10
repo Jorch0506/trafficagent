@@ -182,6 +182,7 @@ export default function Home() {
           onStart={() => setScreen("form")}
           onLogout={handleLogout}
           onViewPlan={handleViewPlan}
+          onAnalyzeSite={(url) => { setFormData(prev => ({ ...prev, url })); setScreen("form"); }}
         />
       )}
 

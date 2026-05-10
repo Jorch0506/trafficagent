@@ -66,13 +66,16 @@ export default async function handler(req, res) {
     }
 
     const result = await apiRes.json();
+    console.log("api2pdf response:", JSON.stringify(result).substring(0, 300));
 
-    if (!result.FileUrl) {
+    // api2pdf v2: Result.Url; v1: FileUrl
+    const pdfUrl = result?.Result?.Url || result?.FileUrl || result?.url || result?.pdf;
+    if (!pdfUrl) {
       throw new Error("No se recibió URL del PDF: " + JSON.stringify(result));
     }
 
     // Descargar el PDF generado y reenviarlo al cliente
-    const pdfRes  = await fetch(result.FileUrl);
+    const pdfRes  = await fetch(pdfUrl);
     const pdfBuf  = await pdfRes.arrayBuffer();
     const pdfBuffer = Buffer.from(pdfBuf);
 

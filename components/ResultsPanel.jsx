@@ -1,5 +1,5 @@
 // components/ResultsPanel.jsx
-// Panel de resultados con exportación a PDF via jsPDF
+// Panel de resultados con exportación a PDF — diseño premium sin emojis
 
 import { useState } from "react";
 import { LogoSVG } from "./LogoSVG";
@@ -30,7 +30,6 @@ function ScoreRing({ score }) {
   );
 }
 
-// Carga jsPDF desde CDN de forma lazy
 function loadJsPDF() {
   return new Promise((resolve, reject) => {
     if (window.jspdf) { resolve(window.jspdf.jsPDF); return; }
@@ -42,303 +41,407 @@ function loadJsPDF() {
   });
 }
 
+// Elimina emojis y caracteres no ASCII que jsPDF no puede renderizar
+function clean(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, "")   // emojis Unicode altos
+    .replace(/[\u2600-\u27BF]/g, "")           // símbolos misc
+    .replace(/[\uD800-\uDFFF]/g, "")           // surrogates
+    .replace(/[^\x00-\xFF]/g, "")              // todo fuera de Latin-1
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function exportToPDF(data, url) {
   const jsPDF = await loadJsPDF();
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-  const pageW = 210;
-  const margin = 18;
-  const contentW = pageW - margin * 2;
-  let y = 20;
+  const W = 210, H = 297;
+  const ml = 20, mr = 20;
+  const cw = W - ml - mr;
+  let y = 0;
 
-  const colors = {
+  const C = {
+    bg:      [8,   15,  30],
+    surface: [15,  25,  50],
+    card:    [20,  35,  65],
+    border:  [40,  60,  100],
     brand:   [56,  189, 248],
     success: [74,  222, 128],
     warning: [245, 158, 11],
-    accent:  [232, 121, 249],
-    dark:    [15,  23,  42],
-    gray:    [100, 116, 139],
-    light:   [226, 232, 240],
-    white:   [255, 255, 255],
+    accent:  [178, 120, 255],
+    white:   [240, 245, 255],
+    muted:   [140, 160, 195],
+    dim:     [80,  100, 140],
   };
 
-  const addPage = () => {
+  const newPage = () => {
     doc.addPage();
-    y = 20;
+    // fondo en cada página nueva
+    doc.setFillColor(...C.bg);
+    doc.rect(0, 0, W, H, "F");
+    y = 22;
   };
 
-  const checkY = (needed = 20) => {
-    if (y + needed > 270) addPage();
+  const guard = (need = 20) => { if (y + need > H - 18) newPage(); };
+
+  const hline = (color = C.border, lw = 0.2) => {
+    doc.setDrawColor(...color);
+    doc.setLineWidth(lw);
+    doc.line(ml, y, W - mr, y);
+    y += 4;
   };
 
-  const drawRect = (x, ry, w, h, r, fillColor) => {
-    doc.setFillColor(...fillColor);
-    doc.roundedRect(x, ry, w, h, r, r, "F");
+  const section = (title, color = C.brand) => {
+    guard(14);
+    y += 2;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...color);
+    doc.text(title.toUpperCase(), ml, y);
+    y += 2;
+    doc.setDrawColor(...color);
+    doc.setLineWidth(0.4);
+    doc.line(ml, y, ml + 30, y);
+    y += 7;
+  };
+
+  const bodyText = (text, indent = 0, size = 9, color = C.white) => {
+    guard(12);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(size);
+    doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(clean(text), cw - indent);
+    doc.text(lines, ml + indent, y);
+    y += lines.length * (size * 0.42) + 3;
+  };
+
+  const label = (text, size = 7.5, color = C.muted) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(size);
+    doc.setTextColor(...color);
+    doc.text(clean(text).toUpperCase(), ml, y);
+    y += 4;
   };
 
   // ── PORTADA ──────────────────────────────────────────────────────────
-  // Fondo oscuro
-  doc.setFillColor(...colors.dark);
-  doc.rect(0, 0, 210, 297, "F");
+  doc.setFillColor(...C.bg);
+  doc.rect(0, 0, W, H, "F");
 
-  // Gradiente simulado con rectángulos de color
-  doc.setFillColor(38, 100, 180);
-  doc.rect(0, 0, 210, 4, "F");
+  // Banda superior de color
+  doc.setFillColor(...C.brand);
+  doc.rect(0, 0, W, 3, "F");
 
-  // Logo texto
-  doc.setTextColor(...colors.white);
+  // Banda lateral izquierda decorativa
+  doc.setFillColor(...C.card);
+  doc.rect(0, 0, 6, H, "F");
+
+  // Logo y nombre
+  y = 36;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(28);
-  doc.text("CAEVIK", margin, 40);
+  doc.setFontSize(32);
+  doc.setTextColor(...C.white);
+  doc.text("CAEVIK", ml + 8, y);
 
-  doc.setFontSize(11);
-  doc.setTextColor(...colors.gray);
-  doc.text("AI Traffic Agent", margin, 48);
+  doc.setFontSize(10);
+  doc.setTextColor(...C.brand);
+  doc.text("AI Traffic Agent", ml + 8, y + 8);
 
-  // Línea decorativa
-  doc.setDrawColor(...colors.brand);
-  doc.setLineWidth(0.5);
-  doc.line(margin, 54, margin + 40, 54);
+  // Separador
+  y += 20;
+  doc.setDrawColor(...C.border);
+  doc.setLineWidth(0.3);
+  doc.line(ml + 8, y, W - mr, y);
+  y += 12;
 
   // Título del reporte
-  doc.setTextColor(...colors.white);
-  doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
-  doc.text("Plan de Tráfico Orgánico", margin, 80);
+  doc.setFontSize(22);
+  doc.setTextColor(...C.white);
+  doc.text("Plan de Trafico Organico", ml + 8, y);
+  y += 10;
 
-  // URL analizada
-  doc.setFontSize(13);
-  doc.setTextColor(...colors.brand);
-  doc.text(url || "—", margin, 92);
+  // URL
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(...C.brand);
+  doc.text(clean(url || "—"), ml + 8, y);
+  y += 8;
 
   // Fecha
-  doc.setFontSize(10);
-  doc.setTextColor(...colors.gray);
+  doc.setFontSize(9);
+  doc.setTextColor(...C.muted);
   const fecha = new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
-  doc.text(`Generado el ${fecha}`, margin, 102);
+  doc.text(`Generado el ${fecha}`, ml + 8, y);
+  y += 22;
 
-  // Métricas resumen en portada
+  // Tarjetas de métricas 2x2
   const metrics = [
-    { label: "SEO Score", value: String(data.scoreSEO || "—"), color: colors.brand },
-    { label: "Tráfico est.", value: data.traficoEstimado ? `${(data.traficoEstimado.min/1000).toFixed(1)}K-${(data.traficoEstimado.max/1000).toFixed(1)}K/mes` : "—", color: colors.success },
-    { label: "Potencial", value: data.potencialCrecimiento || "—", color: colors.warning },
-    { label: "Posts", value: String(data.posts?.length || "—"), color: colors.accent },
+    { l: "SEO Score",     v: String(data.scoreSEO || "—"),              c: C.brand   },
+    { l: "Trafico Est.",  v: data.traficoEstimado
+        ? `${(data.traficoEstimado.min/1000).toFixed(1)}K - ${(data.traficoEstimado.max/1000).toFixed(1)}K/mes`
+        : "—",                                                           c: C.success },
+    { l: "Potencial",     v: clean(data.potencialCrecimiento || "—"),   c: C.warning },
+    { l: "Posts",         v: String(data.posts?.length || "—"),         c: C.accent  },
   ];
 
-  const cardW = (contentW - 9) / 2;
+  const cardW = (cw - 6) / 2;
+  const cardH = 22;
   metrics.forEach((m, i) => {
     const col = i % 2;
     const row = Math.floor(i / 2);
-    const cx = margin + col * (cardW + 6);
-    const cy = 125 + row * 28;
-    drawRect(cx, cy, cardW, 22, 3, [20, 30, 50]);
-    doc.setFontSize(14);
+    const cx = ml + 8 + col * (cardW + 6);
+    const cy = y + row * (cardH + 5);
+    // fondo tarjeta
+    doc.setFillColor(...C.card);
+    doc.roundedRect(cx, cy, cardW, cardH, 2, 2, "F");
+    // borde izquierdo de color
+    doc.setFillColor(...m.c);
+    doc.rect(cx, cy, 2, cardH, "F");
+    // valor
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(...m.color);
-    doc.text(m.value, cx + 6, cy + 10);
-    doc.setFontSize(8);
-    doc.setTextColor(...colors.gray);
-    doc.text(m.label.toUpperCase(), cx + 6, cy + 17);
+    doc.setFontSize(13);
+    doc.setTextColor(...m.c);
+    doc.text(m.v, cx + 7, cy + 10);
+    // label
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...C.muted);
+    doc.text(m.l.toUpperCase(), cx + 7, cy + 17);
   });
 
-  // Separador
-  doc.setDrawColor(...colors.brand);
-  doc.setLineWidth(0.3);
-  doc.line(margin, 195, pageW - margin, 195);
+  y += 2 * (cardH + 5) + 16;
 
-  // Competencia y oportunidad
+  // Competencia
+  doc.setFillColor(...C.surface);
+  doc.roundedRect(ml + 8, y, cw - 8, 22, 2, 2, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...C.muted);
+  doc.text("COMPETENCIA", ml + 14, y + 8);
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.setTextColor(...colors.gray);
-  doc.text("COMPETENCIA:", margin, 205);
-  doc.setTextColor(...colors.light);
-  doc.text(data.competencia?.nivel || "—", margin + 35, 205);
-  doc.setTextColor(...colors.gray);
-  doc.text("OPORTUNIDAD:", margin, 214);
-  doc.setTextColor(...colors.light);
-  const opText = doc.splitTextToSize(data.competencia?.oportunidad || "—", contentW - 40);
-  doc.text(opText, margin + 35, 214);
+  doc.setTextColor(...C.white);
+  doc.text(clean(data.competencia?.nivel || "—"), ml + 14, y + 16);
+
+  const opoX = ml + 8 + (cw - 8) / 2 + 4;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...C.muted);
+  doc.text("OPORTUNIDAD", opoX, y + 8);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...C.success);
+  const opoLines = doc.splitTextToSize(clean(data.competencia?.oportunidad || "—"), (cw - 8) / 2 - 10);
+  doc.text(opoLines, opoX, y + 16);
+  y += 30;
 
   // Footer portada
-  doc.setFontSize(8);
-  doc.setTextColor(...colors.gray);
-  doc.text("Generado por CAEVIK · caevik.com", margin, 285);
+  doc.setFontSize(7.5);
+  doc.setTextColor(...C.dim);
+  doc.text("Generado por CAEVIK  |  caevik.com", ml + 8, H - 12);
 
-  // ── PÁGINA 2: KEYWORDS ───────────────────────────────────────────────
-  addPage();
-  doc.setFillColor(...colors.dark);
-  doc.rect(0, 0, 210, 297, "F");
+  // ── PÁGINA 2: KEYWORDS + ACCIONES ───────────────────────────────────
+  newPage();
 
-  const sectionTitle = (title, color = colors.brand) => {
-    checkY(14);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(...color);
-    doc.text(title, margin, y);
-    doc.setDrawColor(...color);
-    doc.setLineWidth(0.3);
-    doc.line(margin, y + 2, margin + doc.getTextWidth(title), y + 2);
-    y += 10;
-  };
-
-  const pill = (text, x, py, bg, textColor) => {
-    const tw = doc.getTextWidth(text);
-    drawRect(x, py - 4, tw + 8, 7, 2, bg);
-    doc.setTextColor(...textColor);
-    doc.setFontSize(8);
-    doc.text(text, x + 4, py);
-    return tw + 12;
-  };
-
-  sectionTitle("Keywords Primarias");
+  section("Keywords Primarias", C.brand);
   if (data.keywordsPrimarias?.length) {
-    let kx = margin;
+    let kx = ml;
+    const startY = y;
     data.keywordsPrimarias.forEach(kw => {
-      const tw = doc.getTextWidth(kw) + 8;
-      if (kx + tw > pageW - margin) { kx = margin; y += 9; checkY(9); }
-      kx += pill(kw, kx, y, [10, 40, 70], colors.brand);
+      const t = clean(kw);
+      doc.setFontSize(8.5);
+      const tw = doc.getTextWidth(t);
+      const pw = tw + 10;
+      if (kx + pw > W - mr) { kx = ml; y += 9; guard(9); }
+      doc.setFillColor(15, 40, 70);
+      doc.roundedRect(kx, y - 5, pw, 7, 1.5, 1.5, "F");
+      doc.setTextColor(...C.brand);
+      doc.text(t, kx + 5, y);
+      kx += pw + 4;
     });
     y += 12;
   }
 
-  sectionTitle("Keywords Long Tail", colors.accent);
+  section("Keywords Long Tail", C.accent);
   if (data.keywordsLongTail?.length) {
-    let kx = margin;
     data.keywordsLongTail.forEach(kw => {
-      const tw = doc.getTextWidth(kw) + 8;
-      if (kx + tw > pageW - margin) { kx = margin; y += 9; checkY(9); }
-      kx += pill(kw, kx, y, [50, 20, 70], colors.accent);
+      guard(8);
+      doc.setFontSize(8.5);
+      doc.setTextColor(...C.muted);
+      doc.text("—", ml, y);
+      doc.setTextColor(...C.white);
+      doc.text(clean(kw), ml + 5, y);
+      y += 7;
     });
-    y += 12;
+    y += 4;
   }
 
-  // ── ACCIONES INMEDIATAS ───────────────────────────────────────────────
-  checkY(20);
-  sectionTitle("Acciones Inmediatas", colors.success);
-  data.accionesInmediatas?.forEach((accion, i) => {
-    checkY(16);
-    drawRect(margin, y - 4, 6, 6, 1, colors.success);
-    doc.setFontSize(8);
-    doc.setTextColor(...colors.gray);
-    doc.text(String(i + 1).padStart(2, "0"), margin + 1.5, y);
-    doc.setTextColor(...colors.light);
+  section("Acciones Inmediatas", C.success);
+  data.accionesInmediatas?.forEach((a, i) => {
+    guard(16);
+    // número
+    doc.setFillColor(...C.success);
+    doc.circle(ml + 3, y - 1, 2.5, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(...C.bg);
+    doc.text(String(i + 1), ml + 3 - (i < 9 ? 1 : 1.8), y);
+    // texto
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    const lines = doc.splitTextToSize(accion, contentW - 12);
-    doc.text(lines, margin + 10, y);
+    doc.setTextColor(...C.white);
+    const lines = doc.splitTextToSize(clean(a), cw - 12);
+    doc.text(lines, ml + 9, y);
     y += lines.length * 5 + 4;
   });
 
-  // ── PÁGINA 3+: POSTS ─────────────────────────────────────────────────
+  // ── PÁGINAS DE POSTS ─────────────────────────────────────────────────
   if (data.posts?.length) {
-    addPage();
-    doc.setFillColor(...colors.dark);
-    doc.rect(0, 0, 210, 297, "F");
-    sectionTitle("Posts para Redes Sociales", colors.accent);
+    newPage();
+    section("Posts para Redes Sociales", C.accent);
 
     data.posts.forEach((post, i) => {
-      checkY(40);
-      const redColor = post.red === "Instagram" ? colors.accent : colors.brand;
-      drawRect(margin, y - 2, contentW, 2, 0, redColor);
-      y += 4;
+      guard(38);
 
-      doc.setFontSize(8);
-      doc.setTextColor(...redColor);
-      doc.text(`${post.red?.toUpperCase()} · ${post.tipo || ""}`, margin, y);
-      doc.setFontSize(8);
-      doc.setTextColor(...colors.gray);
-      doc.text(`POST ${String(i + 1).padStart(2, "0")}`, pageW - margin - doc.getTextWidth(`POST ${String(i + 1).padStart(2, "0")}`), y);
-      y += 6;
+      const redColor = post.red === "Instagram" ? C.accent : C.brand;
 
+      // Cabecera del post
+      doc.setFillColor(...C.card);
+      doc.roundedRect(ml, y - 2, cw, 10, 1.5, 1.5, "F");
+      doc.setFillColor(...redColor);
+      doc.roundedRect(ml, y - 2, cw, 10, 1.5, 1.5, "F");
+      // texto cabecera
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(...C.bg);
+      doc.text(`${clean(post.red)}  |  ${clean(post.tipo)}`, ml + 4, y + 4);
+      doc.text(`POST ${String(i + 1).padStart(2, "0")}`, W - mr - doc.getTextWidth(`POST ${String(i + 1).padStart(2, "0")}`) - 4, y + 4);
+      y += 13;
+
+      // Título del post
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.setTextColor(...colors.white);
-      const titleLines = doc.splitTextToSize(post.titulo || "", contentW);
-      doc.text(titleLines, margin, y);
+      doc.setTextColor(...C.white);
+      const titleLines = doc.splitTextToSize(clean(post.titulo), cw);
+      doc.text(titleLines, ml, y);
       y += titleLines.length * 5 + 3;
 
+      // Caption
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(...colors.gray);
-      const captionLines = doc.splitTextToSize(post.caption || "", contentW);
-      doc.text(captionLines, margin, y);
-      y += captionLines.length * 4 + 3;
+      doc.setFontSize(8.5);
+      doc.setTextColor(...C.muted);
+      const captionLines = doc.splitTextToSize(clean(post.caption), cw);
+      doc.text(captionLines, ml, y);
+      y += captionLines.length * 4.2 + 3;
 
+      // Hashtags (solo texto, sin emojis)
       if (post.hashtags?.length) {
-        doc.setFontSize(7.5);
-        doc.setTextColor(56, 189, 248);
-        const hashText = post.hashtags.slice(0, 5).join("  ");
-        doc.text(hashText, margin, y);
-        y += 8;
+        doc.setFontSize(8);
+        doc.setTextColor(...C.brand);
+        const hashText = post.hashtags.map(h => clean(h)).filter(Boolean).slice(0, 6).join("  ");
+        const hashLines = doc.splitTextToSize(hashText, cw);
+        doc.text(hashLines, ml, y);
+        y += hashLines.length * 4 + 3;
       }
-      y += 3;
+
+      // Separador entre posts
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.15);
+      doc.line(ml, y, W - mr, y);
+      y += 6;
     });
   }
 
   // ── ARTÍCULOS SEO ─────────────────────────────────────────────────────
   if (data.articulosSEO?.length) {
-    addPage();
-    doc.setFillColor(...colors.dark);
-    doc.rect(0, 0, 210, 297, "F");
-    sectionTitle("Artículos SEO", colors.success);
+    newPage();
+    section("Articulos SEO", C.success);
 
     data.articulosSEO.forEach((art, i) => {
-      checkY(35);
-      doc.setFontSize(8);
-      doc.setTextColor(...colors.gray);
-      doc.text(`ARTÍCULO ${i + 1} · /${art.slug || ""}`, margin, y);
-      y += 5;
+      guard(35);
 
+      // Número de artículo
+      label(`Articulo ${i + 1}  /  /${clean(art.slug)}`, 7.5, C.dim);
+
+      // Título
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.setTextColor(...colors.success);
-      const artTitle = doc.splitTextToSize(art.titulo || "", contentW);
-      doc.text(artTitle, margin, y);
+      doc.setTextColor(...C.success);
+      const artTitle = doc.splitTextToSize(clean(art.titulo), cw);
+      doc.text(artTitle, ml, y);
       y += artTitle.length * 5 + 2;
 
+      // Meta description
       doc.setFont("helvetica", "italic");
-      doc.setFontSize(8);
-      doc.setTextColor(...colors.gray);
-      const meta = doc.splitTextToSize(art.metaDescription || "", contentW);
-      doc.text(meta, margin, y);
-      y += meta.length * 4 + 3;
+      doc.setFontSize(8.5);
+      doc.setTextColor(...C.muted);
+      const meta = doc.splitTextToSize(clean(art.metaDescription), cw);
+      doc.text(meta, ml, y);
+      y += meta.length * 4.2 + 3;
 
-      if (art.estructura?.length) {
+      // Palabras clave
+      if (art.palabrasClave?.length) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
-        doc.setTextColor(...colors.light);
+        doc.setTextColor(...C.brand);
+        doc.text(art.palabrasClave.map(k => clean(k)).join("  |  "), ml, y);
+        y += 5;
+      }
+
+      // Estructura
+      if (art.estructura?.length) {
         art.estructura.forEach(h => {
-          checkY(6);
-          doc.text(`  ${h}`, margin, y);
+          guard(6);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8.5);
+          doc.setTextColor(...C.dim);
+          doc.text(`  ${clean(h)}`, ml, y);
           y += 5;
         });
       }
-      y += 5;
+
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.15);
+      doc.line(ml, y + 2, W - mr, y + 2);
+      y += 8;
     });
   }
 
   // ── DIRECTORIOS ───────────────────────────────────────────────────────
   if (data.directorios?.length) {
-    addPage();
-    doc.setFillColor(...colors.dark);
-    doc.rect(0, 0, 210, 297, "F");
-    sectionTitle("Directorios Relevantes", colors.warning);
+    newPage();
+    section("Directorios Relevantes", C.warning);
 
     data.directorios.forEach((dir, i) => {
-      checkY(16);
-      const prioColor = dir.prioridad === "Alta" ? colors.success : dir.prioridad === "Media" ? colors.warning : colors.gray;
-      drawRect(margin, y - 4, contentW, 12, 2, [20, 30, 50]);
+      guard(14);
+      const prioColor = dir.prioridad === "Alta" ? C.success : dir.prioridad === "Media" ? C.warning : C.dim;
+
+      doc.setFillColor(...C.card);
+      doc.roundedRect(ml, y - 4, cw, 12, 1.5, 1.5, "F");
+
+      // Indicador de prioridad (barra lateral)
+      doc.setFillColor(...prioColor);
+      doc.rect(ml, y - 4, 2, 12, "F");
+
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9);
-      doc.setTextColor(...colors.white);
-      doc.text(dir.nombre || "", margin + 4, y);
+      doc.setTextColor(...C.white);
+      doc.text(clean(dir.nombre), ml + 7, y + 1);
+
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.5);
-      doc.setTextColor(...colors.gray);
-      doc.text(dir.url || "", margin + 4, y + 5);
-      const prioText = dir.prioridad || "—";
+      doc.setTextColor(...C.muted);
+      doc.text(clean(dir.url), ml + 7, y + 6);
+
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
       doc.setTextColor(...prioColor);
-      doc.text(prioText, pageW - margin - doc.getTextWidth(prioText) - 4, y + 2);
-      y += 16;
+      const prioText = clean(dir.prioridad || "—");
+      doc.text(prioText, W - mr - doc.getTextWidth(prioText) - 4, y + 3);
+
+      y += 15;
     });
   }
 
@@ -346,13 +449,17 @@ async function exportToPDF(data, url) {
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
+    // línea footer
+    doc.setDrawColor(...C.border);
+    doc.setLineWidth(0.2);
+    doc.line(ml, H - 10, W - mr, H - 10);
     doc.setFontSize(7);
-    doc.setTextColor(...colors.gray);
-    doc.text(`CAEVIK · caevik.com · Página ${p} de ${totalPages}`, margin, 291);
+    doc.setTextColor(...C.dim);
+    doc.text("CAEVIK  |  caevik.com", ml, H - 6);
+    doc.text(`Pagina ${p} de ${totalPages}`, W - mr - doc.getTextWidth(`Pagina ${p} de ${totalPages}`), H - 6);
   }
 
-  // Guardar
-  const filename = `caevik-plan-${(url || "sitio").replace(/https?:\/\//, "").replace(/\//g, "")}-${new Date().toISOString().slice(0, 10)}.pdf`;
+  const filename = `caevik-${clean(url || "plan").replace(/https?:\/\//, "").replace(/[^a-zA-Z0-9]/g, "-").slice(0, 30)}-${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(filename);
 }
 
@@ -376,46 +483,21 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
   const handleUpgrade = async (planId) => {
     if (!user) { onShowAuth(); return; }
     try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planId }),
-      });
+      const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: planId }) });
       const d = await res.json();
       if (d.url) window.location.href = d.url;
-      else alert("Error al procesar el pago.");
-    } catch {
-      alert("Error de conexión.");
-    }
+    } catch { alert("Error de conexión."); }
   };
 
   const getUpgradeCTA = () => {
-    if (!user) {
-      return <button onClick={onShowAuth} style={ctaStyle("var(--gradient-brand)")}>Guardar plan gratis →</button>;
-    }
-    if (!userPlan || userPlan === "free") {
-      return <button onClick={() => handleUpgrade("starter")} style={ctaStyle("var(--gradient-brand)")}>Activar Starter $29 →</button>;
-    }
-    if (userPlan === "starter") {
-      return <button onClick={() => handleUpgrade("growth")} style={ctaStyle("var(--gradient-warm)")}>Activar Growth $99 →</button>;
-    }
-    if (userPlan === "growth") {
-      return <button onClick={() => handleUpgrade("agency")} style={ctaStyle("var(--gradient-agency)")}>Activar Agency $299 →</button>;
-    }
+    if (!user) return <button onClick={onShowAuth} style={ctaStyle("var(--gradient-brand)")}>Guardar plan gratis →</button>;
+    if (!userPlan || userPlan === "free") return <button onClick={() => handleUpgrade("starter")} style={ctaStyle("var(--gradient-brand)")}>Activar Starter $29 →</button>;
+    if (userPlan === "starter") return <button onClick={() => handleUpgrade("growth")} style={ctaStyle("var(--gradient-warm)")}>Activar Growth $99 →</button>;
+    if (userPlan === "growth") return <button onClick={() => handleUpgrade("agency")} style={ctaStyle("var(--gradient-agency)")}>Activar Agency $299 →</button>;
     return null;
   };
 
-  const ctaStyle = (bg) => ({
-    padding: "10px 20px",
-    background: bg,
-    border: "none",
-    borderRadius: "var(--radius-sm)",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "var(--text-sm)",
-    fontWeight: 700,
-    fontFamily: "var(--font-sans)",
-  });
+  const ctaStyle = (bg) => ({ padding: "10px 20px", background: bg, border: "none", borderRadius: "var(--radius-sm)", color: "#fff", cursor: "pointer", fontSize: "var(--text-sm)", fontWeight: 700, fontFamily: "var(--font-sans)" });
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-base)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
@@ -427,25 +509,11 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
           </div>
         </div>
         <div style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap", alignItems: "center" }}>
-          {user && (
-            <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", background: "var(--bg-elevated)", padding: "4px 12px", borderRadius: "var(--radius-full)", border: "1px solid var(--bg-border)" }}>
-              Plan: {userPlan || "free"}
-            </span>
-          )}
-          {/* Botón exportar PDF */}
-          <button
-            onClick={handleExportPDF}
-            disabled={exporting}
-            style={{ padding: "10px 16px", background: "transparent", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)", color: exporting ? "var(--text-disabled)" : "var(--text-secondary)", cursor: exporting ? "not-allowed" : "pointer", fontSize: "var(--text-sm)", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: "var(--space-2)" }}
-          >
+          {user && <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", background: "var(--bg-elevated)", padding: "4px 12px", borderRadius: "var(--radius-full)", border: "1px solid var(--bg-border)" }}>Plan: {userPlan || "free"}</span>}
+          <button onClick={handleExportPDF} disabled={exporting} style={{ padding: "10px 16px", background: "transparent", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)", color: exporting ? "var(--text-disabled)" : "var(--text-secondary)", cursor: exporting ? "not-allowed" : "pointer", fontSize: "var(--text-sm)", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             {exporting ? "Exportando..." : "⬇ Exportar PDF"}
           </button>
-          <button
-            onClick={onReset}
-            style={{ padding: "10px 20px", background: "transparent", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)", color: "var(--text-secondary)", cursor: "pointer", fontSize: "var(--text-sm)", fontFamily: "var(--font-sans)" }}
-          >
-            ← Nuevo análisis
-          </button>
+          <button onClick={onReset} style={{ padding: "10px 20px", background: "transparent", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)", color: "var(--text-secondary)", cursor: "pointer", fontSize: "var(--text-sm)", fontFamily: "var(--font-sans)" }}>← Nuevo análisis</button>
           {getUpgradeCTA()}
         </div>
       </div>
@@ -453,9 +521,7 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 24px" }}>
         <div style={{ display: "flex", gap: "var(--space-1)", marginBottom: "var(--space-8)", background: "var(--bg-elevated)", borderRadius: "var(--radius-lg)", padding: 4, width: "fit-content", flexWrap: "wrap" }}>
           {tabs.map(([id, label]) => (
-            <button key={id} onClick={() => setTab(id)} style={{ padding: "10px 18px", borderRadius: "var(--radius-sm)", border: "none", fontSize: "var(--text-sm)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)", background: tab === id ? "var(--gradient-brand)" : "transparent", color: tab === id ? "#fff" : "var(--text-muted)" }}>
-              {label}
-            </button>
+            <button key={id} onClick={() => setTab(id)} style={{ padding: "10px 18px", borderRadius: "var(--radius-sm)", border: "none", fontSize: "var(--text-sm)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)", background: tab === id ? "var(--gradient-brand)" : "transparent", color: tab === id ? "#fff" : "var(--text-muted)" }}>{label}</button>
           ))}
         </div>
 
@@ -475,16 +541,13 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
                 </div>
               ))}
             </div>
-
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-5)", marginBottom: "var(--space-6)" }}>
               <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)" }}>
                 <ScoreRing score={data.scoreSEO} />
-                <div style={{ textAlign: "center", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-                  Oportunidad: <span style={{ color: "var(--brand-success)" }}>{data.competencia?.oportunidad}</span>
-                </div>
+                <div style={{ textAlign: "center", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>Oportunidad: <span style={{ color: "var(--brand-success)" }}>{data.competencia?.oportunidad}</span></div>
               </div>
               <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)" }}>
-                <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>⚡ ACCIONES INMEDIATAS</div>
+                <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>ACCIONES INMEDIATAS</div>
                 {data.accionesInmediatas?.map((a, i) => (
                   <div key={i} style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-2)", alignItems: "flex-start" }}>
                     <span style={{ color: "var(--brand-primary)", fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", marginTop: 2, flexShrink: 0 }}>{String(i + 1).padStart(2, "0")}</span>
@@ -493,26 +556,18 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
                 ))}
               </div>
             </div>
-
             <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)" }}>
-              <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>🔑 KEYWORDS PRIMARIAS</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
-                {data.keywordsPrimarias?.map(kw => <Tag key={kw} color="#38bdf8">{kw}</Tag>)}
-              </div>
-              <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "var(--space-3)" }}>🎯 LONG TAIL</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
-                {data.keywordsLongTail?.map(kw => <Tag key={kw} color="#818cf8">{kw}</Tag>)}
-              </div>
+              <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>KEYWORDS PRIMARIAS</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>{data.keywordsPrimarias?.map(kw => <Tag key={kw} color="#38bdf8">{kw}</Tag>)}</div>
+              <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "var(--space-3)" }}>LONG TAIL</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>{data.keywordsLongTail?.map(kw => <Tag key={kw} color="#818cf8">{kw}</Tag>)}</div>
             </div>
-
             {!user && (
               <div style={{ background: "linear-gradient(135deg, #38bdf811, #818cf811)", border: "1px solid #38bdf833", borderRadius: "var(--radius-lg)", padding: "var(--space-6)", textAlign: "center", marginTop: "var(--space-6)" }}>
                 <div style={{ fontSize: 28, marginBottom: "var(--space-3)" }}>💾</div>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-xl)", marginBottom: "var(--space-2)" }}>Guarda este plan gratis</div>
                 <div style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)", marginBottom: "var(--space-5)" }}>Crea tu cuenta para guardar resultados y generar más análisis cada mes.</div>
-                <button onClick={onShowAuth} style={{ padding: "14px 32px", background: "var(--gradient-brand)", border: "none", borderRadius: "var(--radius-md)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: "var(--text-base)", fontFamily: "var(--font-sans)" }}>
-                  Crear cuenta gratis →
-                </button>
+                <button onClick={onShowAuth} style={{ padding: "14px 32px", background: "var(--gradient-brand)", border: "none", borderRadius: "var(--radius-md)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: "var(--text-base)", fontFamily: "var(--font-sans)" }}>Crear cuenta gratis →</button>
               </div>
             )}
           </div>
@@ -523,17 +578,12 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
             {data.posts?.map((post, i) => (
               <div key={i} style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
-                  <div style={{ display: "flex", gap: "var(--space-2)" }}>
-                    <Tag color={post.red === "Instagram" ? "#e879f9" : "#38bdf8"}>{post.red}</Tag>
-                    <Tag color="#64748b">{post.tipo}</Tag>
-                  </div>
+                  <div style={{ display: "flex", gap: "var(--space-2)" }}><Tag color={post.red === "Instagram" ? "#e879f9" : "#38bdf8"}>{post.red}</Tag><Tag color="#64748b">{post.tipo}</Tag></div>
                   <span style={{ fontSize: "var(--text-xs)", color: "var(--text-disabled)", fontFamily: "var(--font-mono)" }}>POST {String(i + 1).padStart(2, "0")}</span>
                 </div>
                 <div style={{ fontWeight: 700, fontSize: "var(--text-md)", marginBottom: "var(--space-2)" }}>{post.titulo}</div>
                 <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: "var(--space-4)", background: "var(--bg-surface)", borderRadius: "var(--radius-md)", padding: "var(--space-4)" }}>{post.caption}</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)" }}>
-                  {post.hashtags?.map(h => <span key={h} style={{ fontSize: "var(--text-xs)", color: "var(--brand-primary)" }}>{h}</span>)}
-                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)" }}>{post.hashtags?.map(h => <span key={h} style={{ fontSize: "var(--text-xs)", color: "var(--brand-primary)" }}>{h}</span>)}</div>
               </div>
             ))}
           </div>
@@ -546,11 +596,9 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
                 <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontFamily: "var(--font-mono)", marginBottom: "var(--space-2)" }}>ARTÍCULO {i + 1} · /{art.slug}</div>
                 <div style={{ fontWeight: 700, fontSize: "var(--text-lg)", marginBottom: "var(--space-2)", color: "var(--brand-primary)" }}>{art.titulo}</div>
                 <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "var(--space-4)", fontStyle: "italic" }}>{art.metaDescription}</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)", marginBottom: "var(--space-4)" }}>
-                  {art.palabrasClave?.map(kw => <Tag key={kw} color="#4ade80">{kw}</Tag>)}
-                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)", marginBottom: "var(--space-4)" }}>{art.palabrasClave?.map(kw => <Tag key={kw} color="#4ade80">{kw}</Tag>)}</div>
                 <div style={{ borderTop: "1px solid var(--bg-border)", paddingTop: "var(--space-4)" }}>
-                  <div style={{ fontSize: "var(--text-xs)", color: "var(--text-disabled)", marginBottom: "var(--space-2)" }}>ESTRUCTURA DEL ARTÍCULO</div>
+                  <div style={{ fontSize: "var(--text-xs)", color: "var(--text-disabled)", marginBottom: "var(--space-2)" }}>ESTRUCTURA</div>
                   {art.estructura?.map((h, j) => <div key={j} style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", padding: "5px 0" }}>{h}</div>)}
                 </div>
               </div>
@@ -561,16 +609,11 @@ export function ResultsPanel({ data, url, onReset, user, userPlan, onShowAuth })
         {tab === "directorios" && (
           <div>
             <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)", marginBottom: "var(--space-4)" }}>
-              <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "var(--space-5)" }}>
-                Directorios donde tu negocio debe aparecer para generar tráfico orgánico:
-              </div>
+              <div style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "var(--space-5)" }}>Directorios donde tu negocio debe aparecer para generar tráfico orgánico:</div>
               <div style={{ display: "grid", gap: "var(--space-3)" }}>
                 {data.directorios?.map((dir, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", background: "var(--bg-surface)", borderRadius: "var(--radius-md)", border: "1px solid var(--bg-border)" }}>
-                    <div>
-                      <div style={{ fontWeight: 600, marginBottom: "var(--space-1)" }}>{dir.nombre}</div>
-                      <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>{dir.url}</div>
-                    </div>
+                    <div><div style={{ fontWeight: 600, marginBottom: "var(--space-1)" }}>{dir.nombre}</div><div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>{dir.url}</div></div>
                     <Tag color={dir.prioridad === "Alta" ? "#4ade80" : "#f59e0b"}>{dir.prioridad}</Tag>
                   </div>
                 ))}

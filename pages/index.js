@@ -1,5 +1,5 @@
 // pages/index.js
-// Sistema de errores tipados — sin alert(), mensajes inline en el formulario
+// Consume el stream SSE de Claude — el plan aparece progresivamente
 
 import { useState, useRef } from "react";
 import Head from "next/head";
@@ -11,11 +11,10 @@ import { GeneratorForm } from "../components/GeneratorForm";
 import { ResultsPanel } from "../components/ResultsPanel";
 import { DashboardHome } from "../components/DashboardHome";
 
-// Catálogo de errores tipados con título, mensaje y CTA opcional
 const ERRORS = {
   LIMIT_REACHED: (plan, limit) => ({
     title: "Límite del mes alcanzado",
-    message: `Has usado tus ${limit} análisis del plan ${plan}. Haz upgrade para continuar generando planes este mes.`,
+    message: `Has usado tus ${limit} análisis del plan ${plan}. Haz upgrade para continuar.`,
     cta: { label: "Ver planes de upgrade", action: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
   }),
   API_ERROR: {
@@ -41,6 +40,7 @@ export default function Home() {
   const [showAuth, setShowAuth] = useState(false);
   const [savedUrl, setSavedUrl] = useState(null);
   const [formError, setFormError] = useState(null);
+  const [streamText, setStreamText] = useState("");
   const intervalRef = useRef(null);
 
   const { user, userData, userPlan, logout } = useAuth();
@@ -48,16 +48,18 @@ export default function Home() {
   const handleFormSubmit = async (data) => {
     setFormData(data);
     setFormError(null);
+    setStreamText("");
     setLoading(true);
     setScreen("loading");
     setLoadingStep(0);
 
+    // Avanzar pasos del loading mientras llega el stream
     let step = 0;
     intervalRef.current = setInterval(() => {
       step++;
       setLoadingStep(step);
       if (step >= STEPS.length - 1) clearInterval(intervalRef.current);
-    }, 3500);
+    }, 4000);
 
     try {
       const res = await fetch("/api/generate", {
@@ -66,18 +68,12 @@ export default function Home() {
         body: JSON.stringify({ ...data, userId: user?.id }),
       });
 
-      clearInterval(intervalRef.current);
-      setLoadingStep(STEPS.length);
-
-      if (res.ok) {
-        const plan = await res.json();
-        setResult(plan);
-        setSavedUrl(data.url);
-        setScreen("results");
-      } else {
+      // Si la respuesta no es stream (error HTTP antes del stream)
+      if (!res.ok) {
+        clearInterval(intervalRef.current);
         const err = await res.json();
         setScreen("form");
-
+        setLoading(false);
         if (err.error === "limite_alcanzado") {
           setFormError(ERRORS.LIMIT_REACHED(err.plan, err.limit));
         } else if (err.error === "Error consultando usuario") {
@@ -85,13 +81,63 @@ export default function Home() {
         } else {
           setFormError(ERRORS.API_ERROR);
         }
+        return;
+      }
+
+      // Leer el stream SSE
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const raw = line.slice(6).trim();
+          if (!raw) continue;
+
+          try {
+            const event = JSON.parse(raw);
+
+            if (event.type === "chunk") {
+              // Acumular texto del stream para mostrar progreso
+              setStreamText(prev => prev + event.text);
+            }
+
+            if (event.type === "done") {
+              // Plan completo recibido
+              clearInterval(intervalRef.current);
+              setLoadingStep(STEPS.length);
+              setResult(event.plan);
+              setSavedUrl(data.url);
+              setScreen("results");
+              setLoading(false);
+              return;
+            }
+
+            if (event.type === "error") {
+              clearInterval(intervalRef.current);
+              setScreen("form");
+              setLoading(false);
+              setFormError(ERRORS.API_ERROR);
+              return;
+            }
+          } catch {
+            // Ignorar líneas no parseables
+          }
+        }
       }
     } catch {
       clearInterval(intervalRef.current);
       setScreen("form");
-      setFormError(ERRORS.NETWORK_ERROR);
-    } finally {
       setLoading(false);
+      setFormError(ERRORS.NETWORK_ERROR);
     }
   };
 
@@ -101,6 +147,7 @@ export default function Home() {
     setResult(null);
     setSavedUrl(null);
     setFormError(null);
+    setStreamText("");
   };
 
   const handleViewPlan = (id, planData) => {
@@ -158,7 +205,7 @@ export default function Home() {
       )}
 
       {screen === "loading" && (
-        <LoadingState step={loadingStep} />
+        <LoadingState step={loadingStep} streamText={streamText} />
       )}
 
       {screen === "results" && (

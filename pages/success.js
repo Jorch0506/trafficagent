@@ -10,7 +10,6 @@ import { LogoSVG } from "../components/LogoSVG";
 const PLAN_DETAILS = {
   starter: {
     name: "Starter",
-    price: "$29 USD/mes",
     color: "#38bdf8",
     emoji: "🚀",
     tagline: "Ya puedes generar hasta 20 planes de tráfico al mes.",
@@ -25,7 +24,6 @@ const PLAN_DETAILS = {
   },
   growth: {
     name: "Growth",
-    price: "$99 USD/mes",
     color: "#f59e0b",
     emoji: "📈",
     tagline: "Escala tu tráfico orgánico con 60 análisis al mes y 3 sitios.",
@@ -41,7 +39,6 @@ const PLAN_DETAILS = {
   },
   agency: {
     name: "Agency",
-    price: "$299 USD/mes",
     color: "#e879f9",
     emoji: "🏆",
     tagline: "Gestiona hasta 10 sitios con 100 análisis al mes.",
@@ -75,7 +72,6 @@ export default function Success() {
     }
   }, [plan]);
 
-  // Countdown para redirigir automáticamente
   useEffect(() => {
     if (!details) return;
     const timer = setInterval(() => {
@@ -125,20 +121,15 @@ export default function Success() {
             {details?.tagline || "Tu plan está activo. Empieza a generar tráfico orgánico ahora mismo."}
           </p>
 
-          {/* Card del plan activado */}
+          {/* Card del plan activado — sin precio */}
           {details && (
             <div style={{ background: "var(--bg-surface)", border: `1px solid ${planColor}44`, borderRadius: "var(--radius-xl)", padding: "var(--space-6)", marginBottom: "var(--space-6)", boxShadow: `0 0 40px ${planColor}18`, textAlign: "left" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--space-5)" }}>
-                <div>
-                  <div style={{ fontSize: "var(--text-xs)", color: planColor, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", marginBottom: "var(--space-1)" }}>
-                    PLAN ACTIVADO
-                  </div>
-                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-2xl)", color: planColor }}>
-                    {details.name}
-                  </div>
+              <div style={{ marginBottom: "var(--space-5)" }}>
+                <div style={{ fontSize: "var(--text-xs)", color: planColor, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", marginBottom: "var(--space-1)" }}>
+                  PLAN ACTIVADO
                 </div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-lg)", fontWeight: 700, color: planColor }}>
-                  {details.price}
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-2xl)", color: planColor }}>
+                  {details.name}
                 </div>
               </div>
 

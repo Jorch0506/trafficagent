@@ -84,17 +84,111 @@ body { background: #050a14; color: #e2e8f0; }
 
 }
 
-/* --- Accesibilidad: estados de foco visibles --- */
+/* ============================================
+   ACCESIBILIDAD — WCAG 2.2
+   ============================================ */
+
+/* Estados de foco visibles para navegación por teclado (WCAG 2.4.7) */
 *:focus-visible {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
 
-/* --- Scrollbar personalizado (Webkit) --- */
+/* Nunca eliminar el foco sin reemplazarlo */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Botones y elementos interactivos — tamaño mínimo de toque 44x44px (WCAG 2.5.5) */
+button, [role="button"], a, input, select, textarea {
+  min-height: 44px;
+}
+
+/* Excepción para elementos inline pequeños */
+button.inline-small {
+  min-height: unset;
+}
+
+/* Reducción de movimiento para usuarios con vestibular disorders (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip link — permite a usuarios de teclado saltar al contenido principal */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-4);
+  z-index: 9999;
+  padding: var(--space-2) var(--space-4);
+  background: var(--brand-primary);
+  color: var(--bg-base);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+/* Texto solo para lectores de pantalla (WCAG 1.3.1) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Interactividad explícita — cursor pointer en todos los elementos clickeables */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+select {
+  cursor: pointer;
+}
+
+/* Estados disabled — comunicar visualmente que no es interactivo */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Contraste en placeholders (WCAG 1.4.3) */
+::placeholder {
+  color: var(--text-disabled);
+  opacity: 1;
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADO (Webkit)
+   ============================================ */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--bg-border); border-radius: var(--radius-full); }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-disabled); }
 
-/* --- Selección de texto --- */
-::selection { background: var(--brand-primary); color: var(--bg-base); opacity: 0.3; }
+/* ============================================
+   SELECCIÓN DE TEXTO
+   ============================================ */
+::selection {
+  background: var(--brand-primary);
+  color: var(--bg-base);
+}

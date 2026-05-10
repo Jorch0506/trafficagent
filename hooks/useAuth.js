@@ -1,7 +1,5 @@
 // hooks/useAuth.js
-// Maneja sesión, datos del usuario y estado de onboarding
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 export const supabase = createClient(
@@ -10,9 +8,12 @@ export const supabase = createClient(
 );
 
 export function useAuth() {
-  const [user, setUser] = useState(null);
+  const [user, setUser]         = useState(null);
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
+
+  // Evitar que onboarding parpadee al volver a la pestaña
+  const onboardingShownRef = useRef(false);
 
   const fetchUserData = async (userId) => {
     const { data, error } = await supabase
@@ -20,11 +21,7 @@ export function useAuth() {
       .select("plan, analyses_used, analyses_limit, subscription_status, onboarding_completed")
       .eq("id", userId)
       .single();
-
-    if (error) {
-      console.error("Error fetching user data:", error);
-      return;
-    }
+    if (error) { console.error("Error fetching user data:", error); return; }
     if (data) setUserData(data);
   };
 
@@ -40,10 +37,15 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        fetchUserData(session.user.id);
+        // Solo refetch si no tenemos userData aún (evita reset al cambiar pestaña)
+        setUserData(prev => {
+          if (!prev) fetchUserData(session.user.id);
+          return prev;
+        });
       } else {
         setUser(null);
         setUserData(null);
+        onboardingShownRef.current = false;
       }
     });
 
@@ -54,22 +56,33 @@ export function useAuth() {
     await supabase.auth.signOut();
     setUser(null);
     setUserData(null);
+    onboardingShownRef.current = false;
   };
 
   const markOnboardingComplete = () => {
+    onboardingShownRef.current = true;
     setUserData(prev => prev ? { ...prev, onboarding_completed: true } : prev);
   };
+
+  // onboardingDone es true si:
+  // 1. Aún estamos cargando (para no mostrar antes de saber)
+  // 2. El usuario ya lo completó en DB
+  // 3. Ya lo marcamos como mostrado en esta sesión
+  const onboardingDone =
+    loading ||
+    (userData?.onboarding_completed ?? true) ||
+    onboardingShownRef.current;
 
   return {
     user,
     userData,
-    userPlan:          userData?.plan || "free",
-    analysesUsed:      userData?.analyses_used ?? 0,
-    analysesLimit:     userData?.analyses_limit ?? 1,
-    onboardingDone:    userData?.onboarding_completed ?? true, // true por defecto para no mostrar a usuarios existentes mientras carga
+    userPlan:        userData?.plan || "free",
+    analysesUsed:    userData?.analyses_used ?? 0,
+    analysesLimit:   userData?.analyses_limit ?? 1,
+    onboardingDone,
     loading,
     logout,
     markOnboardingComplete,
-    refetchUserData:   () => user?.id && fetchUserData(user.id),
+    refetchUserData: () => user?.id && fetchUserData(user.id),
   };
 }

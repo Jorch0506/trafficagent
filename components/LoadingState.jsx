@@ -1,5 +1,5 @@
 // components/LoadingState.jsx
-// Pantalla de carga durante la generación del plan con IA
+// Pantalla de carga con indicador de stream en tiempo real
 
 function GlowOrb({ x, y, color = "#38bdf8", size = 300, opacity = 0.12 }) {
   return (
@@ -7,7 +7,7 @@ function GlowOrb({ x, y, color = "#38bdf8", size = 300, opacity = 0.12 }) {
   );
 }
 
-const STEPS = [
+export const STEPS = [
   { id: 1, label: "Analizando tu sitio web...", icon: "🔍" },
   { id: 2, label: "Investigando keywords de tu nicho...", icon: "📊" },
   { id: 3, label: "Estudiando a tu competencia...", icon: "🎯" },
@@ -17,14 +17,16 @@ const STEPS = [
   { id: 7, label: "Preparando tu plan de tráfico...", icon: "🚀" },
 ];
 
-export { STEPS };
+export function LoadingState({ step, streamText }) {
+  const charsReceived = streamText?.length || 0;
+  const isStreaming = charsReceived > 0;
 
-export function LoadingState({ step }) {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-base)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
       <GlowOrb x="20%" y="20%" color="var(--brand-primary)" size={500} opacity={0.08} />
       <GlowOrb x="60%" y="60%" color="var(--brand-accent)" size={400} opacity={0.06} />
-      <div style={{ textAlign: "center", position: "relative", zIndex: 10, maxWidth: 480, padding: "var(--space-6)" }}>
+
+      <div style={{ textAlign: "center", position: "relative", zIndex: 10, maxWidth: 480, padding: "var(--space-6)", width: "100%" }}>
         <div style={{ fontSize: 60, marginBottom: "var(--space-6)" }}>⚡</div>
         <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-2xl)", marginBottom: "var(--space-2)" }}>
           Analizando tu negocio
@@ -32,7 +34,9 @@ export function LoadingState({ step }) {
         <p style={{ color: "var(--text-muted)", fontSize: "var(--text-base)", marginBottom: "var(--space-10)" }}>
           Esto puede tomar hasta 60 segundos. No cierres esta página.
         </p>
-        <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)" }}>
+
+        {/* Pasos animados */}
+        <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)", marginBottom: isStreaming ? "var(--space-4)" : 0 }}>
           {STEPS.map((s, i) => {
             const done = i < step;
             const active = i === step;
@@ -48,7 +52,33 @@ export function LoadingState({ step }) {
             );
           })}
         </div>
+
+        {/* Indicador de stream en tiempo real */}
+        {isStreaming && (
+          <div style={{ background: "var(--bg-surface)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-md)", padding: "var(--space-3) var(--space-4)", display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--brand-success)", flexShrink: 0, animation: "pulse 1s infinite" }} />
+            <div style={{ flex: 1, textAlign: "left" }}>
+              <div style={{ fontSize: "var(--text-xs)", color: "var(--brand-success)", fontWeight: 600, marginBottom: 2 }}>
+                Recibiendo tu plan...
+              </div>
+              <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+                {charsReceived.toLocaleString()} caracteres generados
+              </div>
+            </div>
+            <div style={{ width: 60, height: 3, background: "var(--bg-border)", borderRadius: "var(--radius-full)", overflow: "hidden", flexShrink: 0 }}>
+              <div style={{ height: "100%", width: "40%", background: "var(--brand-success)", borderRadius: "var(--radius-full)", animation: "shimmer 1.5s infinite" }} />
+            </div>
+          </div>
+        )}
+
       </div>
+
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-150%); }
+          100% { transform: translateX(350%); }
+        }
+      `}</style>
     </div>
   );
 }

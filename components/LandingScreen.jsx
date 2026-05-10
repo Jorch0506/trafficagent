@@ -424,8 +424,8 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
 
       {/* ── CTA FINAL ────────────────────────────────────────────────────── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 120px", position: "relative", zIndex: 10 }}>
-        <div className="cta-section" style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))", border: "1px solid rgba(56,189,248,0.15)", borderRadius: 24, padding: "80px 64px", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 44, letterSpacing: -2, marginBottom: 16, lineHeight: 1.1 }}>
+        <div className="cta-section" style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))", border: "1px solid rgba(56,189,248,0.15)", borderRadius: 24, padding: "80px 64px", textAlign: "center", overflow: "hidden" }}>
+          <h2 className="cta-h2" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 44, letterSpacing: -2, marginBottom: 16, lineHeight: 1.1 }}>
             Tu competencia ya<br />está generando tráfico.
           </h2>
           <p style={{ fontSize: 16, color: "#64748b", marginBottom: 40, maxWidth: 480, margin: "0 auto 40px" }}>
@@ -471,20 +471,41 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 8px #4ade80} 50%{opacity:0.6;box-shadow:0 0 4px #4ade80} }
         
         @media (max-width: 768px) {
+          /* Hero */
           .hero-section { padding-top: 60px !important; padding-bottom: 48px !important; padding-left: 20px !important; padding-right: 20px !important; }
           .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .hero-panel { display: none !important; }
-          .steps-grid { grid-template-columns: 1fr !important; }
-          .steps-arrow { display: none !important; }
-          .deliverables-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
-          .who-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-          .includes-grid { grid-template-columns: 1fr !important; }
-          .pricing-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-          .beta-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+
+          /* Sections padding */
           .section-pad { padding-left: 20px !important; padding-right: 20px !important; }
           nav { padding: 16px 20px !important; }
-          .cta-section { padding: 48px 24px !important; }
-          .glass-who { padding: 32px 24px !important; }
+
+          /* Steps */
+          .steps-grid { grid-template-columns: 1fr !important; }
+          .steps-arrow { display: none !important; }
+
+          /* Includes — 1 columna */
+          .includes-grid { grid-template-columns: 1fr !important; }
+
+          /* Para quién */
+          .who-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+          .glass-who { padding: 28px 20px !important; }
+
+          /* Pricing */
+          .pricing-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+
+          /* CTA final — evitar overflow de texto */
+          .cta-section { padding: 40px 20px !important; border-radius: 16px !important; }
+          .cta-section h2 { font-size: 32px !important; letter-spacing: -1px !important; word-break: break-word !important; }
+
+          .cta-section h2, .cta-h2 { font-size: 32px !important; letter-spacing: -1px !important; word-break: break-word !important; overflow-wrap: break-word !important; }
+
+          /* Textos grandes que se salen */
+          h1 { font-size: clamp(36px, 10vw, 64px) !important; }
+          h2 { font-size: clamp(28px, 8vw, 42px) !important; word-break: break-word !important; overflow-wrap: break-word !important; }
+
+          /* Contenedores — evitar overflow horizontal */
+          * { max-width: 100%; box-sizing: border-box; }
         }
       `}</style>
     </div>

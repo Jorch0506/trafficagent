@@ -1,10 +1,8 @@
 // components/LandingScreen.jsx
-// Rediseño Fase 3 — luxury-tech dark, nivel Silicon Valley premium
+// Optimizado para conversión — lanzamiento
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "./Header";
-
-// ── Utilidades visuales ───────────────────────────────────────────────────────
 
 function NoiseTexture() {
   return (
@@ -33,52 +31,24 @@ function GradientMesh() {
   );
 }
 
-// ── Componentes UI ────────────────────────────────────────────────────────────
-
-function GlassCard({ children, style = {}, accent = false }) {
+function GlassCard({ children, style = {} }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered
-          ? "rgba(255,255,255,0.04)"
-          : "rgba(255,255,255,0.02)",
+        background: hovered ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
         border: `1px solid ${hovered ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
         borderRadius: 16,
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
         transition: "all 0.3s ease",
-        boxShadow: hovered
-          ? "0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)"
-          : "0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03)",
+        boxShadow: hovered ? "0 8px 40px rgba(0,0,0,0.4)" : "0 4px 20px rgba(0,0,0,0.2)",
         ...style,
       }}
     >
       {children}
-    </div>
-  );
-}
-
-function MetricPill({ value, label, color }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-      <span style={{
-        fontFamily: "'Syne', sans-serif",
-        fontWeight: 800,
-        fontSize: 38,
-        letterSpacing: -2,
-        background: `linear-gradient(135deg, ${color}, ${color}99)`,
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        lineHeight: 1,
-      }}>
-        {value}
-      </span>
-      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 500 }}>
-        {label}
-      </span>
     </div>
   );
 }
@@ -114,25 +84,44 @@ const PLANS = [
   },
 ];
 
-const DELIVERABLES = [
-  { n: "25", label: "Posts", sub: "Instagram & Facebook", color: "#38bdf8", icon: "◈" },
-  { n: "12", label: "Artículos SEO", sub: "con estructura H2", color: "#4ade80", icon: "◎" },
-  { n: "20", label: "Directorios", sub: "relevantes para tu nicho", color: "#f59e0b", icon: "◉" },
-  { n: "10", label: "Keywords", sub: "primarias + long tail", color: "#e879f9", icon: "◇" },
-];
-
 const NICHES = ["E-commerce", "SaaS", "Health Tech", "Agencias", "Negocios locales", "Consultoría", "Educación", "Fintech"];
 
-// ── Componente principal ──────────────────────────────────────────────────────
+const STEPS = [
+  { n: "01", title: "Ingresa tu URL", desc: "Solo pega la dirección de tu sitio web. Nada más." },
+  { n: "02", title: "La IA analiza tu nicho", desc: "Claude analiza tu industria, competencia y oportunidades de tráfico." },
+  { n: "03", title: "Descarga tu plan completo", desc: "Keywords, posts listos para publicar, artículos SEO y directorios en 60 segundos." },
+];
+
+const FAQ = [
+  {
+    q: "¿Necesito conocimientos de SEO para usar CAEVIK?",
+    a: "No. CAEVIK está diseñado para fundadores, emprendedores y dueños de negocio que no tienen tiempo de aprender SEO. La IA hace todo el trabajo técnico y te entrega el plan listo para ejecutar.",
+  },
+  {
+    q: "¿Qué tan rápido veo resultados?",
+    a: "El plan se genera en 60 segundos. Los resultados en tráfico orgánico dependen de qué tan rápido implementes el plan — usuarios que publican el contenido generado en la primera semana reportan mejoras visibles en 30-60 días.",
+  },
+  {
+    q: "¿El contenido está personalizado para mi negocio?",
+    a: "Sí. La IA analiza tu sitio web, tu nicho y tu competencia antes de generar el plan. No es contenido genérico — es una estrategia específica para tu negocio.",
+  },
+  {
+    q: "¿Puedo cancelar en cualquier momento?",
+    a: "Sí. No hay contratos ni permanencia. Cancelas cuando quieras desde tu panel de usuario en menos de 30 segundos.",
+  },
+  {
+    q: "¿En qué idioma se genera el contenido?",
+    a: "El plan se genera en español por defecto, optimizado para el mercado hispanohablante. Ideal para negocios en México, España, Colombia, Argentina y toda Latinoamérica.",
+  },
+];
 
 export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth }) {
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [activeNiche, setActiveNiche] = useState(0);
+  const [openFaq, setOpenFaq] = useState(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveNiche(n => (n + 1) % NICHES.length);
-    }, 2000);
+    const interval = setInterval(() => setActiveNiche(n => (n + 1) % NICHES.length), 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -159,98 +148,83 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       <NoiseTexture />
       <GridLines />
       <GradientMesh />
-
       <Header user={user} userPlan={userPlan} onLogout={onLogout} onStart={onStart} onShowAuth={onShowAuth} />
 
-      {/* ── HERO ───────────────────────────────────────────────────────────── */}
+      {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 48px 80px", position: "relative", zIndex: 10 }}>
 
-        {/* Badge */}
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)", borderRadius: 999, padding: "6px 16px", marginBottom: 40 }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block", boxShadow: "0 0 8px #4ade80" }} />
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#94a3b8", textTransform: "uppercase" }}>Beta privada activa</span>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block", boxShadow: "0 0 8px #4ade80", animation: "pulse 2s infinite" }} />
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#94a3b8", textTransform: "uppercase" }}>Beta privada activa — acceso gratuito hoy</span>
         </div>
 
-        {/* Headline asimétrico */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 60, alignItems: "start" }}>
           <div>
-            <h1 style={{
-              fontFamily: "'Syne', sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(42px, 5.5vw, 76px)",
-              lineHeight: 1,
-              letterSpacing: -3,
-              marginBottom: 28,
-            }}>
-              <span style={{ display: "block", color: "#f1f5f9" }}>Tu negocio</span>
-              <span style={{ display: "block", color: "#f1f5f9" }}>merece</span>
-              <span style={{
-                display: "block",
-                background: "linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #e879f9 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}>
-                ser encontrado.
+            <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(42px, 5.5vw, 72px)", lineHeight: 1.05, letterSpacing: -3, marginBottom: 28 }}>
+              <span style={{ display: "block", color: "#f1f5f9" }}>Tráfico orgánico</span>
+              <span style={{ display: "block", color: "#f1f5f9" }}>para tu negocio</span>
+              <span style={{ display: "block", background: "linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #e879f9 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                en 60 segundos.
               </span>
             </h1>
 
-            <p style={{ fontSize: 17, color: "#64748b", lineHeight: 1.8, maxWidth: 500, marginBottom: 44 }}>
-              Ingresa tu URL. La IA analiza tu nicho y genera un plan completo de keywords, posts y artículos SEO en 60 segundos.
+            <p style={{ fontSize: 17, color: "#64748b", lineHeight: 1.8, maxWidth: 520, marginBottom: 16 }}>
+              Ingresa la URL de tu negocio y nuestra IA genera un plan completo de <strong style={{ color: "#94a3b8" }}>keywords, posts para redes sociales y artículos SEO</strong> listos para publicar.
             </p>
+
+            {/* Trust signals bajo el subtítulo */}
+            <div style={{ display: "flex", gap: 20, marginBottom: 40, flexWrap: "wrap" }}>
+              {["✓ Sin conocimientos técnicos", "✓ En español", "✓ Listo para publicar"].map(t => (
+                <span key={t} style={{ fontSize: 13, color: "#475569", fontWeight: 500 }}>{t}</span>
+              ))}
+            </div>
 
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
               <button
                 onClick={onStart}
                 style={{
-                  padding: "14px 36px",
+                  padding: "16px 40px",
                   background: "linear-gradient(135deg, #38bdf8, #818cf8)",
                   border: "none",
                   borderRadius: 10,
                   color: "#03060f",
                   fontWeight: 800,
-                  fontSize: 15,
+                  fontSize: 16,
                   cursor: "pointer",
                   fontFamily: "'DM Sans', sans-serif",
                   letterSpacing: 0.3,
                   boxShadow: "0 0 32px rgba(56,189,248,0.3), 0 4px 16px rgba(0,0,0,0.4)",
                   transition: "all 0.2s ease",
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
-                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 48px rgba(56,189,248,0.4), 0 8px 24px rgba(0,0,0,0.4)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(56,189,248,0.3), 0 4px 16px rgba(0,0,0,0.4)"; }}
               >
-                Generar mi plan →
+                Generar mi plan gratis →
               </button>
-              <span style={{ fontSize: 13, color: "#334155" }}>Gratis · Sin tarjeta · 60 segundos</span>
+              <span style={{ fontSize: 13, color: "#334155" }}>Sin tarjeta · 60 segundos</span>
             </div>
           </div>
 
-          {/* Panel derecho — nicho rotatorio */}
+          {/* Panel derecho */}
           <GlassCard style={{ padding: 28, marginTop: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#38bdf8", textTransform: "uppercase", marginBottom: 20 }}>
-              Generando plan para
-            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#38bdf8", textTransform: "uppercase", marginBottom: 20 }}>Generando plan para</div>
             <div style={{ height: 36, overflow: "hidden", position: "relative", marginBottom: 20 }}>
               {NICHES.map((n, i) => (
-                <div key={n} style={{
-                  position: "absolute",
-                  top: 0, left: 0,
-                  fontFamily: "'Syne', sans-serif",
-                  fontWeight: 700,
-                  fontSize: 22,
-                  color: i === activeNiche ? "#f1f5f9" : "transparent",
-                  transform: `translateY(${(i - activeNiche) * 36}px)`,
-                  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-                  pointerEvents: "none",
-                }}>
+                <div key={n} style={{ position: "absolute", top: 0, left: 0, fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 22, color: i === activeNiche ? "#f1f5f9" : "transparent", transform: `translateY(${(i - activeNiche) * 36}px)`, transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)", pointerEvents: "none" }}>
                   {n}
                 </div>
               ))}
             </div>
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {DELIVERABLES.slice(0, 4).map(d => (
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {[
+                { n: "25", label: "Posts sociales", color: "#38bdf8" },
+                { n: "12", label: "Artículos SEO", color: "#4ade80" },
+                { n: "20", label: "Directorios", color: "#f59e0b" },
+                { n: "10", label: "Keywords", color: "#e879f9" },
+              ].map(d => (
                 <div key={d.label}>
-                  <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, color: d.color, lineHeight: 1 }}>{d.n}</div>
-                  <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>{d.label}</div>
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, color: d.color, lineHeight: 1 }}>{d.n}</div>
+                  <div style={{ fontSize: 11, color: "#475569", marginTop: 3 }}>{d.label}</div>
                 </div>
               ))}
             </div>
@@ -258,119 +232,128 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         </div>
       </section>
 
-      {/* ── WHAT YOU GET ──────────────────────────────────────────────────── */}
+      {/* ── CÓMO FUNCIONA ────────────────────────────────────────────────── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
-          {DELIVERABLES.map((d, i) => (
-            <GlassCard key={d.label} style={{ padding: "28px 24px" }}>
-              <div style={{ fontSize: 28, marginBottom: 16, color: d.color, fontFamily: "monospace" }}>{d.icon}</div>
-              <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 36, color: d.color, lineHeight: 1, marginBottom: 8 }}>{d.n}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8", marginBottom: 4 }}>{d.label}</div>
-              <div style={{ fontSize: 11, color: "#334155" }}>{d.sub}</div>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Así de simple</h2>
+          <p style={{ fontSize: 15, color: "#475569" }}>Sin configuración. Sin curva de aprendizaje.</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+          {STEPS.map((s, i) => (
+            <GlassCard key={s.n} style={{ padding: "36px 28px", position: "relative" }}>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 48, color: "rgba(56,189,248,0.12)", lineHeight: 1, marginBottom: 20, letterSpacing: -2 }}>{s.n}</div>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 10, color: "#f1f5f9" }}>{s.title}</div>
+              <div style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7 }}>{s.desc}</div>
+              {i < 2 && (
+                <div style={{ position: "absolute", right: -12, top: "50%", transform: "translateY(-50%)", color: "#1e293b", fontSize: 20, zIndex: 2 }}>→</div>
+              )}
             </GlassCard>
           ))}
         </div>
       </section>
 
-      {/* ── BETA SOCIAL PROOF ─────────────────────────────────────────────── */}
+      {/* ── QUÉ INCLUYE EL PLAN ───────────────────────────────────────────── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
-        <GlassCard style={{ padding: "56px 64px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
-          <div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: 999, padding: "5px 14px", marginBottom: 24 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block", animation: "pulse 2s infinite" }} />
-              <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: "#4ade80", textTransform: "uppercase" }}>Beta privada activa</span>
-            </div>
-            <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 32, letterSpacing: -1, marginBottom: 16, lineHeight: 1.2 }}>
-              Siendo validado en negocios reales
-            </h2>
-            <p style={{ fontSize: 15, color: "#64748b", lineHeight: 1.8, marginBottom: 32 }}>
-              Actualmente validamos CAEVIK con negocios propios. Los primeros resultados determinarán los casos de éxito que publicaremos aquí.
-            </p>
-            <button
-              onClick={onStart}
-              style={{ padding: "12px 28px", background: "transparent", border: "1px solid rgba(56,189,248,0.4)", borderRadius: 8, color: "#38bdf8", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s ease" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(56,189,248,0.08)"; e.currentTarget.style.borderColor = "rgba(56,189,248,0.7)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(56,189,248,0.4)"; }}
-            >
-              Unirme a la beta gratis →
-            </button>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            {["E-commerce", "SaaS", "Health Tech", "Negocios locales", "Agencias", "Consultoría"].map((n, i) => (
-              <div key={n} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, padding: "14px 16px", fontSize: 13, color: "#64748b", fontWeight: 500, display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ width: 4, height: 4, borderRadius: "50%", background: ["#38bdf8","#4ade80","#f59e0b","#e879f9","#818cf8","#38bdf8"][i], display: "inline-block", flexShrink: 0 }} />
-                {n}
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Un plan completo, listo para publicar</h2>
+          <p style={{ fontSize: 15, color: "#475569" }}>No es solo información — es contenido listo para copiar y publicar hoy.</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+          {[
+            { icon: "📱", title: "Posts para Instagram y Facebook", desc: "Hasta 25 posts con caption completo, hashtags optimizados y tipo de contenido (educativo, testimonial, viral). Solo copia y publica.", color: "#38bdf8" },
+            { icon: "✍️", title: "Artículos de blog SEO", desc: "Hasta 12 artículos con título, meta descripción, estructura H2 y palabras clave integradas. Diseñados para posicionar en Google.", color: "#4ade80" },
+            { icon: "🔑", title: "Keywords primarias y long tail", desc: "Las palabras clave exactas que buscan tus clientes. Primarias para autoridad, long tail para tráfico rápido.", color: "#e879f9" },
+            { icon: "📍", title: "Directorios donde registrarte", desc: "Hasta 20 directorios relevantes para tu nicho con prioridad alta, media o baja. Backlinks gratis para tu sitio.", color: "#f59e0b" },
+          ].map(item => (
+            <GlassCard key={item.title} style={{ padding: "32px 28px", display: "flex", gap: 20, alignItems: "flex-start" }}>
+              <div style={{ fontSize: 32, flexShrink: 0, lineHeight: 1 }}>{item.icon}</div>
+              <div>
+                <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 8, color: item.color }}>{item.title}</div>
+                <div style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7 }}>{item.desc}</div>
               </div>
-            ))}
+            </GlassCard>
+          ))}
+        </div>
+      </section>
+
+      {/* ── PARA QUIÉN ES ────────────────────────────────────────────────── */}
+      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
+        <GlassCard style={{ padding: "56px 64px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+            <div>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 34, letterSpacing: -1, marginBottom: 20, lineHeight: 1.2 }}>
+                ¿Para quién es CAEVIK?
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {[
+                  { icon: "🏪", text: "Dueños de negocio que quieren más clientes sin depender de publicidad pagada" },
+                  { icon: "🚀", text: "Fundadores de startups que necesitan visibilidad orgánica desde el día 1" },
+                  { icon: "📱", text: "Emprendedores que no saben qué publicar en redes sociales" },
+                  { icon: "🏢", text: "Agencias que manejan múltiples clientes y necesitan escalar" },
+                ].map(item => (
+                  <div key={item.text} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                    <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
+                    <span style={{ fontSize: 14, color: "#64748b", lineHeight: 1.6 }}>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 14, color: "#475569", marginBottom: 4, letterSpacing: 1, textTransform: "uppercase" }}>Funciona para cualquier nicho</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                {NICHES.map((n, i) => (
+                  <span key={n} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "8px 14px", fontSize: 13, color: "#64748b", fontWeight: 500 }}>{n}</span>
+                ))}
+              </div>
+              <div style={{ marginTop: 24 }}>
+                <button
+                  onClick={onStart}
+                  style={{ padding: "13px 28px", background: "transparent", border: "1px solid rgba(56,189,248,0.4)", borderRadius: 8, color: "#38bdf8", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s ease" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(56,189,248,0.08)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                >
+                  Probar con mi negocio gratis →
+                </button>
+              </div>
+            </div>
           </div>
         </GlassCard>
       </section>
 
-      {/* ── PRICING ───────────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 120px", position: "relative", zIndex: 10 }}>
+      {/* ── PRICING ──────────────────────────────────────────────────────── */}
+      <section id="pricing" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 42, letterSpacing: -2, marginBottom: 12 }}>
-            Planes que escalan contigo
-          </h2>
-          <p style={{ fontSize: 15, color: "#475569" }}>Empieza gratis. Escala cuando estés listo.</p>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Planes que escalan contigo</h2>
+          <p style={{ fontSize: 15, color: "#475569" }}>Empieza gratis. Escala cuando estés listo. Cancela cuando quieras.</p>
         </div>
-
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {PLANS.map(plan => (
             <div
               key={plan.id}
               style={{
                 position: "relative",
-                background: plan.popular
-                  ? "rgba(255,255,255,0.04)"
-                  : "rgba(255,255,255,0.02)",
-                border: plan.popular
-                  ? `1px solid ${plan.color}44`
-                  : "1px solid rgba(255,255,255,0.06)",
+                background: plan.popular ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
+                border: plan.popular ? `1px solid ${plan.color}44` : "1px solid rgba(255,255,255,0.06)",
                 borderRadius: 16,
                 padding: "32px 24px",
                 backdropFilter: "blur(12px)",
                 boxShadow: plan.popular ? `0 0 40px ${plan.color}18` : "none",
-                transition: "all 0.3s ease",
               }}
             >
               {plan.popular && (
-                <div style={{
-                  position: "absolute",
-                  top: -1, left: -1, right: -1,
-                  height: 3,
-                  background: plan.gradient,
-                  borderRadius: "16px 16px 0 0",
-                }} />
+                <>
+                  <div style={{ position: "absolute", top: -1, left: -1, right: -1, height: 3, background: plan.gradient, borderRadius: "16px 16px 0 0" }} />
+                  <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: plan.gradient, color: "#03060f", fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 999, letterSpacing: 1.5, whiteSpace: "nowrap", textTransform: "uppercase" }}>
+                    Más popular
+                  </div>
+                </>
               )}
-              {plan.popular && (
-                <div style={{
-                  position: "absolute",
-                  top: -12,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  background: plan.gradient,
-                  color: "#03060f",
-                  fontSize: 10,
-                  fontWeight: 800,
-                  padding: "3px 12px",
-                  borderRadius: 999,
-                  letterSpacing: 1.5,
-                  whiteSpace: "nowrap",
-                  textTransform: "uppercase",
-                }}>
-                  Más popular
-                </div>
-              )}
-
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: plan.color, textTransform: "uppercase", marginBottom: 8 }}>{plan.label}</div>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, marginBottom: 16 }}>{plan.name}</div>
-
               <div style={{ marginBottom: 24, display: "flex", alignItems: "baseline", gap: 4 }}>
                 <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 36, background: plan.gradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{plan.price}</span>
                 <span style={{ fontSize: 13, color: "#334155" }}>{plan.period}</span>
               </div>
-
               <div style={{ marginBottom: 28 }}>
                 {plan.features.map(f => (
                   <div key={f} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10, fontSize: 13, color: "#64748b" }}>
@@ -379,19 +362,16 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
                   </div>
                 ))}
               </div>
-
               <button
                 onClick={() => handlePlanClick(plan.id)}
                 disabled={loadingPlan === plan.id}
                 style={{
-                  width: "100%",
-                  padding: "11px",
+                  width: "100%", padding: "11px",
                   background: plan.popular ? plan.gradient : "transparent",
                   border: `1px solid ${plan.popular ? "transparent" : plan.color + "44"}`,
                   borderRadius: 8,
                   color: plan.popular ? "#03060f" : plan.color,
-                  fontWeight: 700,
-                  fontSize: 13,
+                  fontWeight: 700, fontSize: 13,
                   cursor: loadingPlan === plan.id ? "not-allowed" : "pointer",
                   fontFamily: "'DM Sans', sans-serif",
                   opacity: loadingPlan === plan.id ? 0.7 : 1,
@@ -405,16 +385,80 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
             </div>
           ))}
         </div>
+
+        {/* Garantía */}
+        <div style={{ textAlign: "center", marginTop: 32 }}>
+          <span style={{ fontSize: 13, color: "#334155" }}>
+            🔒 Sin contratos · Cancela en cualquier momento · Pago seguro con Stripe
+          </span>
+        </div>
       </section>
 
-      {/* ── FOOTER ────────────────────────────────────────────────────────── */}
+      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
+      <section style={{ maxWidth: 720, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Preguntas frecuentes</h2>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {FAQ.map((item, i) => (
+            <div
+              key={i}
+              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, overflow: "hidden", transition: "all 0.2s ease" }}
+            >
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                style={{ width: "100%", padding: "20px 24px", background: "transparent", border: "none", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}
+              >
+                <span style={{ fontSize: 15, fontWeight: 600, color: "#e2e8f0" }}>{item.q}</span>
+                <span style={{ color: "#38bdf8", fontSize: 20, flexShrink: 0, transform: openFaq === i ? "rotate(45deg)" : "rotate(0)", transition: "transform 0.2s ease" }}>+</span>
+              </button>
+              {openFaq === i && (
+                <div style={{ padding: "0 24px 20px", fontSize: 14, color: "#64748b", lineHeight: 1.8 }}>
+                  {item.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CTA FINAL ────────────────────────────────────────────────────── */}
+      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 120px", position: "relative", zIndex: 10 }}>
+        <div style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))", border: "1px solid rgba(56,189,248,0.15)", borderRadius: 24, padding: "80px 64px", textAlign: "center" }}>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 44, letterSpacing: -2, marginBottom: 16, lineHeight: 1.1 }}>
+            Tu competencia ya<br />está generando tráfico.
+          </h2>
+          <p style={{ fontSize: 16, color: "#64748b", marginBottom: 40, maxWidth: 480, margin: "0 auto 40px" }}>
+            Genera tu primer plan de tráfico orgánico ahora mismo. Gratis. Sin tarjeta. En 60 segundos.
+          </p>
+          <button
+            onClick={onStart}
+            style={{
+              padding: "18px 48px",
+              background: "linear-gradient(135deg, #38bdf8, #818cf8)",
+              border: "none",
+              borderRadius: 12,
+              color: "#03060f",
+              fontWeight: 800,
+              fontSize: 17,
+              cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif",
+              boxShadow: "0 0 48px rgba(56,189,248,0.3)",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 64px rgba(56,189,248,0.4)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 0 48px rgba(56,189,248,0.3)"; }}
+          >
+            Generar mi plan gratis →
+          </button>
+          <div style={{ marginTop: 20, fontSize: 13, color: "#334155" }}>Sin tarjeta · 60 segundos · Cancela cuando quieras</div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "32px 48px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 10, flexWrap: "wrap", gap: 16 }}>
-        <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: -0.5, background: "linear-gradient(135deg, #38bdf8, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          CAEVIK
-        </div>
-        <div style={{ fontSize: 12, color: "#1e293b" }}>
-          © 2026 CAEVIK · AI Traffic Agent
-        </div>
+        <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: -0.5, background: "linear-gradient(135deg, #38bdf8, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>CAEVIK</div>
+        <div style={{ fontSize: 12, color: "#1e293b" }}>© 2026 CAEVIK · AI Traffic Agent</div>
         <div style={{ display: "flex", gap: 24 }}>
           {["Privacidad", "Términos", "hola@caevik.com"].map(l => (
             <span key={l} style={{ fontSize: 12, color: "#1e293b", cursor: "pointer" }}>{l}</span>

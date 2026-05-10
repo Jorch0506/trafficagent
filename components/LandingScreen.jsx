@@ -31,10 +31,11 @@ function GradientMesh() {
   );
 }
 
-function GlassCard({ children, style = {} }) {
+function GlassCard({ children, style = {}, className = "" }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
+      className={className}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -154,13 +155,23 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       <section className="hero-section" style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 48px 80px", position: "relative", zIndex: 10 }}>
 
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)", borderRadius: 999, padding: "6px 16px", marginBottom: 40 }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block", boxShadow: "0 0 8px #4ade80", animation: "pulse 2s infinite" }} />
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block", boxShadow: "0 0 8px #4ade80", animation: "pulse 2s infinite", flexShrink: 0 }} />
           <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#94a3b8", textTransform: "uppercase" }}>Beta privada activa — acceso gratuito hoy</span>
         </div>
 
         <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 60, alignItems: "start" }}>
           <div>
-            <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(42px, 5.5vw, 72px)", lineHeight: 1.05, letterSpacing: -3, marginBottom: 28 }}>
+            {/* FIX CLAVE: clamp() en inline style — no depende de media query */}
+            <h1 style={{
+              fontFamily: "'Syne', sans-serif",
+              fontWeight: 800,
+              fontSize: "clamp(34px, 7vw, 72px)",
+              lineHeight: 1.08,
+              letterSpacing: "clamp(-1px, -0.04em, -3px)",
+              marginBottom: 28,
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+            }}>
               <span style={{ display: "block", color: "#f1f5f9" }}>Tráfico orgánico</span>
               <span style={{ display: "block", color: "#f1f5f9" }}>para tu negocio</span>
               <span style={{ display: "block", background: "linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #e879f9 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -168,11 +179,10 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
               </span>
             </h1>
 
-            <p style={{ fontSize: 17, color: "#64748b", lineHeight: 1.8, maxWidth: 520, marginBottom: 16 }}>
+            <p style={{ fontSize: "clamp(14px, 2.5vw, 17px)", color: "#64748b", lineHeight: 1.8, maxWidth: 520, marginBottom: 16 }}>
               Ingresa la URL de tu negocio y nuestra IA genera un plan completo de <strong style={{ color: "#94a3b8" }}>keywords, posts para redes sociales y artículos SEO</strong> listos para publicar.
             </p>
 
-            {/* Trust signals bajo el subtítulo */}
             <div style={{ display: "flex", gap: 20, marginBottom: 40, flexWrap: "wrap" }}>
               {["✓ Sin conocimientos técnicos", "✓ En español", "✓ Listo para publicar"].map(t => (
                 <span key={t} style={{ fontSize: 13, color: "#475569", fontWeight: 500 }}>{t}</span>
@@ -195,6 +205,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
                   letterSpacing: 0.3,
                   boxShadow: "0 0 32px rgba(56,189,248,0.3), 0 4px 16px rgba(0,0,0,0.4)",
                   transition: "all 0.2s ease",
+                  whiteSpace: "nowrap",
                 }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 48px rgba(56,189,248,0.4), 0 8px 24px rgba(0,0,0,0.4)"; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(56,189,248,0.3), 0 4px 16px rgba(0,0,0,0.4)"; }}
@@ -205,7 +216,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
             </div>
           </div>
 
-          {/* Panel derecho */}
+          {/* Panel derecho — oculto en móvil via CSS */}
           <GlassCard className="hero-panel" style={{ padding: 28, marginTop: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#38bdf8", textTransform: "uppercase", marginBottom: 20 }}>Generando plan para</div>
             <div style={{ height: 36, overflow: "hidden", position: "relative", marginBottom: 20 }}>
@@ -235,7 +246,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       {/* ── CÓMO FUNCIONA ────────────────────────────────────────────────── */}
       <section className="section-pad" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Así de simple</h2>
+          <h2 className="section-h2" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(26px, 5vw, 38px)", letterSpacing: "clamp(-0.5px, -0.03em, -1.5px)", marginBottom: 12, wordBreak: "break-word" }}>Así de simple</h2>
           <p style={{ fontSize: 15, color: "#475569" }}>Sin configuración. Sin curva de aprendizaje.</p>
         </div>
         <div className="steps-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
@@ -255,7 +266,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       {/* ── QUÉ INCLUYE EL PLAN ───────────────────────────────────────────── */}
       <section className="section-pad" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Un plan completo, listo para publicar</h2>
+          <h2 className="section-h2" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(22px, 4.5vw, 38px)", letterSpacing: "clamp(-0.5px, -0.03em, -1.5px)", marginBottom: 12, wordBreak: "break-word", overflowWrap: "break-word" }}>Un plan completo, listo para publicar</h2>
           <p style={{ fontSize: 15, color: "#475569" }}>No es solo información — es contenido listo para copiar y publicar hoy.</p>
         </div>
         <div className="includes-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
@@ -268,7 +279,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
             <GlassCard key={item.title} style={{ padding: "32px 28px", display: "flex", gap: 20, alignItems: "flex-start" }}>
               <div style={{ fontSize: 32, flexShrink: 0, lineHeight: 1 }}>{item.icon}</div>
               <div>
-                <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 8, color: item.color }}>{item.title}</div>
+                <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "clamp(13px, 2vw, 16px)", marginBottom: 8, color: item.color }}>{item.title}</div>
                 <div style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7 }}>{item.desc}</div>
               </div>
             </GlassCard>
@@ -281,7 +292,15 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         <GlassCard style={{ padding: "56px 64px" }} className="glass-who">
           <div className="who-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
             <div>
-              <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 34, letterSpacing: -1, marginBottom: 20, lineHeight: 1.2 }}>
+              <h2 style={{
+                fontFamily: "'Syne', sans-serif",
+                fontWeight: 800,
+                fontSize: "clamp(24px, 4vw, 34px)",
+                letterSpacing: "clamp(-0.5px, -0.02em, -1px)",
+                marginBottom: 20,
+                lineHeight: 1.2,
+                wordBreak: "break-word",
+              }}>
                 ¿Para quién es CAEVIK?
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -301,7 +320,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 14, color: "#475569", marginBottom: 4, letterSpacing: 1, textTransform: "uppercase" }}>Funciona para cualquier nicho</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                {NICHES.map((n, i) => (
+                {NICHES.map((n) => (
                   <span key={n} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "8px 14px", fontSize: 13, color: "#64748b", fontWeight: 500 }}>{n}</span>
                 ))}
               </div>
@@ -323,7 +342,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section id="pricing" className="section-pad" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Planes que escalan contigo</h2>
+          <h2 className="section-h2" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(26px, 5vw, 38px)", letterSpacing: "clamp(-0.5px, -0.03em, -1.5px)", marginBottom: 12, wordBreak: "break-word" }}>Planes que escalan contigo</h2>
           <p style={{ fontSize: 15, color: "#475569" }}>Empieza gratis. Escala cuando estés listo. Cancela cuando quieras.</p>
         </div>
         <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
@@ -386,7 +405,6 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
           ))}
         </div>
 
-        {/* Garantía */}
         <div style={{ textAlign: "center", marginTop: 32 }}>
           <span style={{ fontSize: 13, color: "#334155" }}>
             🔒 Sin contratos · Cancela en cualquier momento · Pago seguro con Stripe
@@ -397,7 +415,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
       <section className="section-pad" style={{ maxWidth: 720, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Preguntas frecuentes</h2>
+          <h2 className="section-h2" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(26px, 5vw, 38px)", letterSpacing: "clamp(-0.5px, -0.03em, -1.5px)", marginBottom: 12, wordBreak: "break-word" }}>Preguntas frecuentes</h2>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {FAQ.map((item, i) => (
@@ -409,7 +427,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 style={{ width: "100%", padding: "20px 24px", background: "transparent", border: "none", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}
               >
-                <span style={{ fontSize: 15, fontWeight: 600, color: "#e2e8f0" }}>{item.q}</span>
+                <span style={{ fontSize: "clamp(13px, 2vw, 15px)", fontWeight: 600, color: "#e2e8f0" }}>{item.q}</span>
                 <span style={{ color: "#38bdf8", fontSize: 20, flexShrink: 0, transform: openFaq === i ? "rotate(45deg)" : "rotate(0)", transition: "transform 0.2s ease" }}>+</span>
               </button>
               {openFaq === i && (
@@ -424,11 +442,28 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
 
       {/* ── CTA FINAL ────────────────────────────────────────────────────── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 120px", position: "relative", zIndex: 10 }}>
-        <div className="cta-section" style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))", border: "1px solid rgba(56,189,248,0.15)", borderRadius: 24, padding: "80px 64px", textAlign: "center", overflow: "hidden" }}>
-          <h2 className="cta-h2" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 44, letterSpacing: -2, marginBottom: 16, lineHeight: 1.1 }}>
+        <div className="cta-section" style={{
+          background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))",
+          border: "1px solid rgba(56,189,248,0.15)",
+          borderRadius: 24,
+          padding: "80px 64px",
+          textAlign: "center",
+          overflow: "hidden",
+        }}>
+          {/* FIX CRÍTICO: clamp() directo en inline style */}
+          <h2 style={{
+            fontFamily: "'Syne', sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(28px, 5.5vw, 44px)",
+            letterSpacing: "clamp(-0.5px, -0.03em, -2px)",
+            marginBottom: 16,
+            lineHeight: 1.1,
+            wordBreak: "break-word",
+            overflowWrap: "break-word",
+          }}>
             Tu competencia ya<br />está generando tráfico.
           </h2>
-          <p style={{ fontSize: 16, color: "#64748b", marginBottom: 40, maxWidth: 480, margin: "0 auto 40px" }}>
+          <p style={{ fontSize: "clamp(14px, 2vw, 16px)", color: "#64748b", marginBottom: 40, maxWidth: 480, margin: "0 auto 40px" }}>
             Genera tu primer plan de tráfico orgánico ahora mismo. Gratis. Sin tarjeta. En 60 segundos.
           </p>
           <button
@@ -440,7 +475,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
               borderRadius: 12,
               color: "#03060f",
               fontWeight: 800,
-              fontSize: 17,
+              fontSize: "clamp(14px, 2.5vw, 17px)",
               cursor: "pointer",
               fontFamily: "'DM Sans', sans-serif",
               boxShadow: "0 0 48px rgba(56,189,248,0.3)",
@@ -469,43 +504,59 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
         @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 8px #4ade80} 50%{opacity:0.6;box-shadow:0 0 4px #4ade80} }
-        
+
+        *, *::before, *::after { box-sizing: border-box; }
+
         @media (max-width: 768px) {
           /* Hero */
-          .hero-section { padding-top: 60px !important; padding-bottom: 48px !important; padding-left: 20px !important; padding-right: 20px !important; }
+          .hero-section {
+            padding-top: 60px !important;
+            padding-bottom: 48px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+          }
           .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .hero-panel { display: none !important; }
 
           /* Sections padding */
-          .section-pad { padding-left: 20px !important; padding-right: 20px !important; }
+          .section-pad {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+          }
           nav { padding: 16px 20px !important; }
 
           /* Steps */
           .steps-grid { grid-template-columns: 1fr !important; }
           .steps-arrow { display: none !important; }
 
-          /* Includes — 1 columna */
+          /* Includes */
           .includes-grid { grid-template-columns: 1fr !important; }
 
           /* Para quién */
           .who-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
           .glass-who { padding: 28px 20px !important; }
 
-          /* Pricing */
-          .pricing-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+          /* Pricing — 2 columnas en móvil (más legible que 1) */
+          .pricing-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
 
-          /* CTA final — evitar overflow de texto */
-          .cta-section { padding: 40px 20px !important; border-radius: 16px !important; }
-          .cta-section h2 { font-size: 32px !important; letter-spacing: -1px !important; word-break: break-word !important; }
+          /* CTA final */
+          .cta-section {
+            padding: 40px 24px !important;
+            border-radius: 16px !important;
+          }
 
-          .cta-section h2, .cta-h2 { font-size: 32px !important; letter-spacing: -1px !important; word-break: break-word !important; overflow-wrap: break-word !important; }
+          /* Footer */
+          footer {
+            padding: 24px 20px !important;
+            flex-direction: column !important;
+            text-align: center !important;
+            gap: 12px !important;
+          }
+        }
 
-          /* Textos grandes que se salen */
-          h1 { font-size: clamp(36px, 10vw, 64px) !important; }
-          h2 { font-size: clamp(28px, 8vw, 42px) !important; word-break: break-word !important; overflow-wrap: break-word !important; }
-
-          /* Contenedores — evitar overflow horizontal */
-          * { max-width: 100%; box-sizing: border-box; }
+        @media (max-width: 420px) {
+          /* Pricing a 1 columna en pantallas muy pequeñas */
+          .pricing-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

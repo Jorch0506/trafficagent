@@ -1,5 +1,6 @@
 // pages/api/webhook.js
 // Recibe eventos de Stripe y actualiza el plan del usuario en Supabase
+// Ahora también envía emails transaccionales via Resend
 
 import { createClient } from "@supabase/supabase-js";
 
@@ -20,6 +21,25 @@ const PRICE_TO_PLAN = {
   "price_1TSHBMJK0PaCWmjf0PMaLQiw": "agency",
 };
 
+const PLAN_FEATURES = {
+  starter: ["20 análisis / mes", "10 posts listos", "5 artículos SEO", "5 directorios", "Soporte email"],
+  growth:  ["60 análisis / mes", "25 posts listos", "12 artículos SEO", "3 sitios web", "Soporte prioritario"],
+  agency:  ["100 análisis / mes", "10 sitios web", "20 directorios", "Manager dedicado", "API próximamente"],
+};
+
+async function sendEmail(type, to, data = {}) {
+  try {
+    const res = await fetch("https://www.caevik.com/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, to, ...data }),
+    });
+    if (!res.ok) console.error("Email error:", await res.json());
+  } catch (err) {
+    console.error("sendEmail error:", err);
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -29,7 +49,6 @@ export default async function handler(req, res) {
   try {
     event = req.body;
   } catch (err) {
-    console.error("Webhook error:", err.message);
     return res.status(400).json({ error: `Webhook error: ${err.message}` });
   }
 
@@ -42,7 +61,6 @@ export default async function handler(req, res) {
         const customerId = session.customer;
         const subscriptionId = session.subscription;
 
-        // Obtener price ID de los line items
         let priceId = null;
         if (session.line_items?.data?.length > 0) {
           priceId = session.line_items.data[0]?.price?.id;
@@ -65,8 +83,16 @@ export default async function handler(req, res) {
             })
             .eq("email", customerEmail);
 
-          if (error) console.error("Error actualizando usuario:", error);
-          else console.log(`Plan actualizado: ${customerEmail} -> ${plan}`);
+          if (error) {
+            console.error("Error actualizando usuario:", error);
+          } else {
+            console.log(`Plan actualizado: ${customerEmail} -> ${plan}`);
+            // Enviar email de plan activado
+            await sendEmail("plan_activated", customerEmail, {
+              plan,
+              features: PLAN_FEATURES[plan],
+            });
+          }
         }
         break;
       }
@@ -130,7 +156,6 @@ export default async function handler(req, res) {
         const invoice = event.data.object;
         const customerId = invoice.customer;
 
-        // Resetear contador de analisis al inicio de cada ciclo de facturacion
         if (invoice.billing_reason === "subscription_cycle") {
           await supabase
             .from("users")

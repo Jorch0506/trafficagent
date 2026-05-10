@@ -163,15 +163,15 @@ export default function Home() {
       <Head>
         <title>CAEVIK — AI Traffic Agent</title>
         <meta name="description" content="Genera tu plan de tráfico orgánico en 60 segundos. Keywords, posts para redes sociales y artículos SEO generados por IA para tu negocio." />
-        <meta property="og:title" content="CAEVIK — AI Traffic Agent" />
-        <meta property="og:description" content="Genera tu plan de tráfico orgánico en 60 segundos. Keywords, posts y artículos SEO generados por IA." />
+        <meta property="og:title" content="CAEVIK — Genera tu plan de tráfico orgánico con IA" />
+        <meta property="og:description" content="Ingresa tu sitio web y en 60 segundos nuestra IA genera keywords, posts para redes sociales y artículos SEO para posicionar tu negocio." />
         <meta property="og:image" content="https://www.caevik.com/og-image.png" />
         <meta property="og:url" content="https://www.caevik.com" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="CAEVIK" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="CAEVIK — AI Traffic Agent" />
-        <meta name="twitter:description" content="Genera tu plan de tráfico orgánico en 60 segundos con IA." />
+        <meta name="twitter:title" content="CAEVIK — Genera tu plan de tráfico orgánico con IA" />
+        <meta name="twitter:description" content="Ingresa tu sitio web y en 60 segundos nuestra IA genera keywords, posts para redes sociales y artículos SEO para posicionar tu negocio." />
         <meta name="twitter:image" content="https://www.caevik.com/og-image.png" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />

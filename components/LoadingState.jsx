@@ -1,5 +1,5 @@
 // components/LoadingState.jsx
-// Pantalla de carga con indicador de stream en tiempo real
+// Pantalla de carga con tiempo estimado dinámico según plan del usuario
 
 function GlowOrb({ x, y, color = "#38bdf8", size = 300, opacity = 0.12 }) {
   return (
@@ -17,9 +17,18 @@ export const STEPS = [
   { id: 7, label: "Preparando tu plan de tráfico...", icon: "🚀" },
 ];
 
-export function LoadingState({ step, streamText }) {
+// Tiempo estimado según plan
+const PLAN_TIME = {
+  free:    "Esto toma entre 15 y 30 segundos. No cierres esta página.",
+  starter: "Esto toma entre 30 y 45 segundos. No cierres esta página.",
+  growth:  "Los planes Growth pueden tardar hasta 60 segundos. No cierres esta página.",
+  agency:  "Los planes Agency pueden tardar hasta 90 segundos. No cierres esta página.",
+};
+
+export function LoadingState({ step, streamText, userPlan }) {
   const charsReceived = streamText?.length || 0;
   const isStreaming = charsReceived > 0;
+  const timeMsg = PLAN_TIME[userPlan] || PLAN_TIME.free;
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-base)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -32,10 +41,9 @@ export function LoadingState({ step, streamText }) {
           Analizando tu negocio
         </h2>
         <p style={{ color: "var(--text-muted)", fontSize: "var(--text-base)", marginBottom: "var(--space-10)" }}>
-          Esto puede tomar hasta 60 segundos. No cierres esta página.
+          {timeMsg}
         </p>
 
-        {/* Pasos animados */}
         <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-6)", marginBottom: isStreaming ? "var(--space-4)" : 0 }}>
           {STEPS.map((s, i) => {
             const done = i < step;
@@ -53,7 +61,6 @@ export function LoadingState({ step, streamText }) {
           })}
         </div>
 
-        {/* Indicador de stream en tiempo real */}
         {isStreaming && (
           <div style={{ background: "var(--bg-surface)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-md)", padding: "var(--space-3) var(--space-4)", display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--brand-success)", flexShrink: 0, animation: "pulse 1s infinite" }} />

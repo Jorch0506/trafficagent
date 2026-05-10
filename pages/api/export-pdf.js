@@ -82,12 +82,12 @@ function generatePremiumHTML(planData, siteUrl, userEmail, plan) {
   }
 
   const planLabel   = { free:"Free", starter:"Starter", growth:"Growth", agency:"Agency" }[plan] || plan;
-  const isRaw       = !!data.raw;
-  const keywords    = data.keywords    || data.keywordsPrimarias  || [];
-  const posts       = data.posts       || data.postsRedesSociales || [];
-  const articulos   = data.articulos   || data.articulosBlog      || [];
+  const isRaw       = !!data.raw && typeof data.raw === "string" && !data.posts && !data.keywords && !data.keywordsPrimarias;
+  const keywords    = data.keywordsPrimarias  || data.keywords    || [];
+  const posts       = data.posts || data.postsRedesSociales || [];
+  const articulos   = data.articulosSEO || data.articulosBlog || data.articulos || [];
   const directorios = data.directorios || data.directoriosLocales || [];
-  const estrategia  = data.estrategia  || data.resumen            || "";
+  const estrategia  = data.competencia?.oportunidad || data.estrategia || data.resumen || "";
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -190,7 +190,7 @@ h1{font-size:28px;font-weight:700;letter-spacing:-1px;line-height:1.2;background
 </div>
 
 <div class="content">
-  ${isRaw ? renderRawContent(data.raw) : renderStructuredContent(keywords, posts, articulos, directorios, estrategia)}
+  ${isRaw ? renderRawContent(data.raw) : renderStructuredContent(keywords, posts, articulos, directorios, estrategia, data)}
 </div>
 
 <div class="footer">
@@ -216,14 +216,19 @@ function renderRawContent(raw) {
   </div>`;
 }
 
-function renderStructuredContent(keywords, posts, articulos, directorios, estrategia) {
+function renderStructuredContent(keywords, posts, articulos, directorios, estrategia, data) {
   const s = [];
 
+  const trafico = data.traficoEstimado
+    ? `${Math.round((data.traficoEstimado.min||0)/1000)}K–${Math.round((data.traficoEstimado.max||0)/1000)}K`
+    : "—";
+  const seoScore = data.scoreSEO ? `${data.scoreSEO}/100` : "—";
+
   s.push(`<div class="stats-row">
-    <div class="stat-card"><div class="stat-value">${keywords.length||"—"}</div><div class="stat-label">Keywords</div></div>
+    <div class="stat-card"><div class="stat-value">${seoScore}</div><div class="stat-label">SEO Score</div></div>
+    <div class="stat-card"><div class="stat-value">${trafico}</div><div class="stat-label">Tráfico/mes</div></div>
     <div class="stat-card"><div class="stat-value">${posts.length||"—"}</div><div class="stat-label">Posts sociales</div></div>
-    <div class="stat-card"><div class="stat-value">${articulos.length||"—"}</div><div class="stat-label">Artículos blog</div></div>
-    <div class="stat-card"><div class="stat-value">${directorios.length||"—"}</div><div class="stat-label">Directorios</div></div>
+    <div class="stat-card"><div class="stat-value">${articulos.length||"—"}</div><div class="stat-label">Artículos SEO</div></div>
   </div>`);
 
   if (estrategia) s.push(`<div class="section">

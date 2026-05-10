@@ -162,6 +162,21 @@ export default function Home() {
     <>
       <Head>
         <title>CAEVIK — AI Traffic Agent</title>
+        <meta name="description" content="Genera tu plan de tráfico orgánico en 60 segundos. Keywords, posts para redes sociales y artículos SEO generados por IA para tu negocio." />
+        <meta property="og:title" content="CAEVIK — AI Traffic Agent" />
+        <meta property="og:description" content="Genera tu plan de tráfico orgánico en 60 segundos. Keywords, posts y artículos SEO generados por IA." />
+        <meta property="og:image" content="https://www.caevik.com/og-image.png" />
+        <meta property="og:url" content="https://www.caevik.com" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="CAEVIK" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="CAEVIK — AI Traffic Agent" />
+        <meta name="twitter:description" content="Genera tu plan de tráfico orgánico en 60 segundos con IA." />
+        <meta name="twitter:image" content="https://www.caevik.com/og-image.png" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="CAEVIK es el agente de IA que hace que tu negocio sea encontrado." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />

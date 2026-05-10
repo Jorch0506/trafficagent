@@ -39,6 +39,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [savedUrl, setSavedUrl] = useState(null);
+  const [initialUrl, setInitialUrl] = useState("");
   const [formError, setFormError] = useState(null);
   const [streamText, setStreamText] = useState("");
   const intervalRef = useRef(null);
@@ -182,7 +183,7 @@ export default function Home() {
           onStart={() => setScreen("form")}
           onLogout={handleLogout}
           onViewPlan={handleViewPlan}
-          onAnalyzeSite={(url) => { setFormData(prev => ({ ...prev, url })); setScreen("form"); }}
+          onAnalyzeSite={(url) => { setInitialUrl(url); setScreen("form"); }}
         />
       )}
 
@@ -198,6 +199,9 @@ export default function Home() {
 
       {screen === "form" && (
         <GeneratorForm
+          initialUrl={initialUrl}
+          onBack={() => { setInitialUrl(""); setScreen("landing"); }}
+          user={user}
           onSubmit={handleFormSubmit}
           loading={loading}
           error={formError}

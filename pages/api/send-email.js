@@ -5,8 +5,6 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = "CAEVIK <hola@caevik.com>";
 
-// ── Templates HTML ────────────────────────────────────────────────────────────
-
 function baseTemplate(content) {
   return `<!DOCTYPE html>
 <html lang="es">
@@ -20,36 +18,24 @@ function baseTemplate(content) {
     <tr>
       <td align="center" style="padding:40px 20px;">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-
-          <!-- Header -->
           <tr>
             <td style="padding:0 0 32px 0;">
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td>
-                    <span style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#38bdf8;">CAEVIK</span>
-                  </td>
-                  <td align="right">
-                    <span style="font-size:11px;color:#1e293b;letter-spacing:1px;text-transform:uppercase;">AI Traffic Agent</span>
-                  </td>
+                  <td><span style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#38bdf8;">CAEVIK</span></td>
+                  <td align="right"><span style="font-size:11px;color:#334155;letter-spacing:1px;text-transform:uppercase;">AI Traffic Agent</span></td>
                 </tr>
               </table>
             </td>
           </tr>
-
-          <!-- Card principal -->
           <tr>
             <td style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:48px 40px;">
               ${content}
             </td>
           </tr>
-
-          <!-- Footer -->
           <tr>
             <td style="padding:32px 0 0 0;text-align:center;">
-              <p style="font-size:12px;color:#1e293b;margin:0 0 8px 0;">
-                © 2026 CAEVIK · AI Traffic Agent
-              </p>
+              <p style="font-size:12px;color:#1e293b;margin:0 0 8px 0;">© 2026 CAEVIK · AI Traffic Agent</p>
               <p style="font-size:12px;color:#1e293b;margin:0;">
                 <a href="https://caevik.com" style="color:#334155;text-decoration:none;">caevik.com</a>
                 &nbsp;·&nbsp;
@@ -57,7 +43,6 @@ function baseTemplate(content) {
               </p>
             </td>
           </tr>
-
         </table>
       </td>
     </tr>
@@ -66,7 +51,6 @@ function baseTemplate(content) {
 </html>`;
 }
 
-// Extrae un nombre legible del email: "jorch22@yahoo.com" → "jorch22"
 function nameFromEmail(email) {
   return (email || "").split("@")[0] || "usuario";
 }
@@ -74,84 +58,95 @@ function nameFromEmail(email) {
 // Email 1 — Bienvenida al registrarse
 function welcomeEmail(name) {
   return baseTemplate(`
-    <div style="text-align:center;margin-bottom:32px;">
-      <div style="font-size:48px;margin-bottom:16px;">👋</div>
-      <h1 style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-1px;margin:0 0 12px 0;line-height:1.2;">
-        Bienvenido a CAEVIK,<br>${name}
+    <div style="height:3px;background:linear-gradient(135deg,#38bdf8,#818cf8,#e879f9);border-radius:999px;margin-bottom:40px;"></div>
+
+    <div style="text-align:center;margin-bottom:36px;">
+      <div style="font-size:52px;margin-bottom:20px;">🚀</div>
+      <h1 style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-1px;margin:0 0 16px 0;line-height:1.25;">
+        Bienvenido a CAEVIK,<br/>${name}
       </h1>
-      <p style="font-size:15px;color:#475569;line-height:1.7;margin:0;">
-        Tu agente de tráfico orgánico con IA está listo.<br>
-        Genera tu primer plan en menos de 60 segundos.
+      <p style="font-size:16px;color:#64748b;line-height:1.8;margin:0 auto;max-width:420px;">
+        Estás a un paso de transformar cómo tu negocio crece en internet. Sin agencias. Sin presupuestos enormes. Solo estrategia inteligente con IA.
       </p>
     </div>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
-      <tr>
-        <td width="48%" style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.15);border-radius:12px;padding:20px 16px;vertical-align:top;">
-          <div style="font-size:22px;font-weight:800;color:#38bdf8;margin-bottom:4px;">25</div>
-          <div style="font-size:12px;color:#64748b;">Posts listos</div>
-        </td>
-        <td width="4%"></td>
-        <td width="48%" style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:12px;padding:20px 16px;vertical-align:top;">
-          <div style="font-size:22px;font-weight:800;color:#4ade80;margin-bottom:4px;">12</div>
-          <div style="font-size:12px;color:#64748b;">Artículos SEO</div>
-        </td>
-      </tr>
-    </table>
+    <div style="border-top:1px solid rgba(255,255,255,0.06);margin:32px 0;"></div>
 
-    <div style="margin-bottom:32px;">
-      <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 8px 0;">✓ &nbsp;Ingresa la URL de tu negocio</p>
-      <p style="font-size:14px;color:#475569;line-height:1.8;margin:0 0 8px 0;">✓ &nbsp;Selecciona tu tipo de negocio</p>
-      <p style="font-size:14px;color:#475569;line-height:1.8;margin:0;">✓ &nbsp;Recibe tu plan completo en 60 segundos</p>
+    <div style="margin-bottom:36px;">
+      <p style="font-size:15px;color:#94a3b8;line-height:1.9;margin:0 0 20px 0;">
+        CAEVIK existe para que <strong style="color:#e2e8f0;">dueños de negocio como tú</strong> puedan competir con grandes marcas en Google, redes sociales y directorios — sin necesitar un equipo de marketing.
+      </p>
+      <p style="font-size:15px;color:#94a3b8;line-height:1.9;margin:0;">
+        En menos de 60 segundos, nuestra IA analiza tu negocio y te entrega un plan completo de keywords, posts listos para publicar y artículos SEO personalizados para tu industria.
+      </p>
     </div>
 
-    <div style="text-align:center;">
-      <a href="https://caevik.com" style="display:inline-block;padding:14px 40px;background:linear-gradient(135deg,#38bdf8,#818cf8);border-radius:10px;color:#03060f;font-weight:800;font-size:15px;text-decoration:none;letter-spacing:0.3px;">
+    <div style="background:rgba(56,189,248,0.05);border-left:3px solid #38bdf8;border-radius:0 12px 12px 0;padding:20px 24px;margin-bottom:36px;">
+      <p style="font-size:15px;color:#94a3b8;line-height:1.8;margin:0;font-style:italic;">
+        "El tráfico orgánico no es suerte — es el resultado de publicar el contenido correcto, en el momento correcto, para las personas correctas."
+      </p>
+      <p style="font-size:12px;color:#475569;margin:10px 0 0 0;">— Equipo CAEVIK</p>
+    </div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+      <a href="https://caevik.com" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#38bdf8,#818cf8);border-radius:10px;color:#03060f;font-weight:800;font-size:16px;text-decoration:none;letter-spacing:0.3px;">
         Generar mi primer plan →
       </a>
     </div>
+
+    <p style="font-size:13px;color:#334155;text-align:center;margin:0 0 32px 0;">
+      Es gratis. No necesitas tarjeta. Solo tu URL y 60 segundos.
+    </p>
+
+    <div style="border-top:1px solid rgba(255,255,255,0.06);margin:0 0 24px 0;"></div>
+
+    <p style="font-size:13px;color:#475569;text-align:center;margin:0;line-height:1.7;">
+      ¿Tienes alguna pregunta? Respondemos personalmente a cada mensaje.<br/>
+      <a href="mailto:hola@caevik.com" style="color:#38bdf8;text-decoration:none;">hola@caevik.com</a>
+    </p>
   `);
 }
 
 // Email 2 — Plan activado después del pago
 function planActivatedEmail(name, plan, features) {
-  const planColors = {
-    starter: "#38bdf8",
-    growth:  "#f59e0b",
-    agency:  "#e879f9",
-  };
+  const planColors = { starter: "#38bdf8", growth: "#f59e0b", agency: "#e879f9" };
   const color = planColors[plan] || "#38bdf8";
   const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
 
   return baseTemplate(`
+    <div style="height:3px;background:linear-gradient(135deg,${color},#818cf8);border-radius:999px;margin-bottom:40px;"></div>
+
     <div style="text-align:center;margin-bottom:32px;">
-      <div style="font-size:48px;margin-bottom:16px;">🎉</div>
-      <h1 style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-1px;margin:0 0 12px 0;line-height:1.2;">
-        ¡Plan activado, ${name}!
+      <div style="font-size:52px;margin-bottom:20px;">🎉</div>
+      <h1 style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-1px;margin:0 0 16px 0;line-height:1.25;">
+        ¡Tu plan está activo, ${name}!
       </h1>
-      <p style="font-size:15px;color:#475569;line-height:1.7;margin:0;">
-        Tu plan está activo. Empieza a generar planes de tráfico ahora mismo.
+      <p style="font-size:15px;color:#64748b;line-height:1.8;margin:0;">
+        Gracias por confiar en CAEVIK. A partir de ahora tienes todo lo que necesitas para dominar el tráfico orgánico de tu negocio.
       </p>
     </div>
 
     <div style="background:rgba(255,255,255,0.02);border:1px solid ${color}30;border-radius:12px;padding:28px;margin-bottom:32px;">
       <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:${color};text-transform:uppercase;margin-bottom:8px;text-align:center;">Plan activo</div>
-      <div style="font-size:32px;font-weight:800;color:${color};text-align:center;margin-bottom:20px;">${planName}</div>
+      <div style="font-size:36px;font-weight:800;color:${color};text-align:center;margin-bottom:20px;">${planName}</div>
       ${(features || []).map(f => `
-        <div style="font-size:14px;color:#64748b;margin-bottom:8px;">
+        <div style="font-size:14px;color:#64748b;margin-bottom:10px;padding-left:4px;">
           <span style="color:${color};">✓</span> &nbsp;${f}
         </div>
       `).join("")}
     </div>
 
-    <div style="text-align:center;">
-      <a href="https://caevik.com" style="display:inline-block;padding:14px 40px;background:linear-gradient(135deg,${color},#818cf8);border-radius:10px;color:#03060f;font-weight:800;font-size:15px;text-decoration:none;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <a href="https://caevik.com" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,${color},#818cf8);border-radius:10px;color:#03060f;font-weight:800;font-size:16px;text-decoration:none;">
         Ir a mi panel →
       </a>
     </div>
 
-    <p style="font-size:12px;color:#1e293b;text-align:center;margin-top:24px;">
-      ¿Dudas? Escríbenos a <a href="mailto:hola@caevik.com" style="color:#475569;">hola@caevik.com</a>
+    <div style="border-top:1px solid rgba(255,255,255,0.06);margin:28px 0;"></div>
+
+    <p style="font-size:13px;color:#475569;text-align:center;margin:0;line-height:1.7;">
+      ¿Dudas o necesitas ayuda? Escríbenos cuando quieras.<br/>
+      <a href="mailto:hola@caevik.com" style="color:#38bdf8;text-decoration:none;">hola@caevik.com</a>
     </p>
   `);
 }
@@ -161,18 +156,20 @@ function limitWarningEmail(name, plan, used, limit) {
   const remaining = limit - used;
   const pct = Math.round((used / limit) * 100);
   return baseTemplate(`
+    <div style="height:3px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:999px;margin-bottom:40px;"></div>
+
     <div style="text-align:center;margin-bottom:32px;">
-      <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
-      <h1 style="font-size:26px;font-weight:800;color:#f1f5f9;letter-spacing:-1px;margin:0 0 12px 0;line-height:1.2;">
+      <div style="font-size:52px;margin-bottom:20px;">⚠️</div>
+      <h1 style="font-size:26px;font-weight:800;color:#f1f5f9;letter-spacing:-1px;margin:0 0 16px 0;line-height:1.25;">
         Te quedan ${remaining} análisis este mes
       </h1>
-      <p style="font-size:15px;color:#475569;line-height:1.7;margin:0;">
+      <p style="font-size:15px;color:#64748b;line-height:1.8;margin:0;">
         Has usado ${used} de ${limit} análisis de tu plan ${plan}.
       </p>
     </div>
 
     <div style="margin-bottom:32px;">
-      <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:8px;overflow:hidden;margin-bottom:8px;">
+      <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:8px;overflow:hidden;margin-bottom:10px;">
         <div style="width:${pct}%;height:100%;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:999px;"></div>
       </div>
       <table width="100%" cellpadding="0" cellspacing="0">
@@ -184,8 +181,8 @@ function limitWarningEmail(name, plan, used, limit) {
     </div>
 
     <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:24px;margin-bottom:32px;">
-      <p style="font-size:14px;color:#94a3b8;margin:0 0 16px 0;line-height:1.7;">
-        Haz upgrade ahora para no quedarte sin análisis a mitad del mes.
+      <p style="font-size:14px;color:#94a3b8;margin:0 0 16px 0;line-height:1.8;">
+        No pierdas el momentum justo cuando tu estrategia está tomando forma. Haz upgrade para seguir generando planes sin interrupciones.
       </p>
       <div style="font-size:13px;color:#64748b;">
         <div style="margin-bottom:8px;">✓ &nbsp;Más análisis mensuales</div>
@@ -194,11 +191,18 @@ function limitWarningEmail(name, plan, used, limit) {
       </div>
     </div>
 
-    <div style="text-align:center;">
-      <a href="https://caevik.com" style="display:inline-block;padding:14px 40px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:10px;color:#03060f;font-weight:800;font-size:15px;text-decoration:none;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <a href="https://caevik.com" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:10px;color:#03060f;font-weight:800;font-size:16px;text-decoration:none;">
         Ver planes de upgrade →
       </a>
     </div>
+
+    <div style="border-top:1px solid rgba(255,255,255,0.06);margin:28px 0;"></div>
+
+    <p style="font-size:13px;color:#475569;text-align:center;margin:0;line-height:1.7;">
+      ¿Preguntas? Estamos aquí para ayudarte.<br/>
+      <a href="mailto:hola@caevik.com" style="color:#38bdf8;text-decoration:none;">hola@caevik.com</a>
+    </p>
   `);
 }
 
@@ -220,7 +224,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "type y to son requeridos" });
   }
 
-  // Usa firstName si viene, si no extrae del email
   const name = firstName || nameFromEmail(to);
 
   let subject, html;
@@ -230,17 +233,14 @@ export default async function handler(req, res) {
       subject = "Bienvenido a CAEVIK — Tu primer plan te espera";
       html = welcomeEmail(name);
       break;
-
     case "plan_activated":
       subject = `Plan ${plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : ""} activado — ¡Empieza a generar tráfico!`;
       html = planActivatedEmail(name, plan, features || []);
       break;
-
     case "limit_warning":
       subject = `Te quedan ${limit - used} análisis este mes`;
       html = limitWarningEmail(name, plan, used, limit);
       break;
-
     default:
       return res.status(400).json({ error: `Tipo de email desconocido: ${type}` });
   }
@@ -252,12 +252,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: [to],
-        subject,
-        html,
-      }),
+      body: JSON.stringify({ from: FROM_EMAIL, to: [to], subject, html }),
     });
 
     const data = await response.json();

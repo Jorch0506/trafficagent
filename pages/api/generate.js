@@ -8,12 +8,21 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Limites de contenido por plan
 const PLAN_LIMITS = {
   free:    { posts: 2,  articulos: 1,  directorios: 1,  keywordsPrimarias: 3,  keywordsLongTail: 1,  acciones: 3,  analyses: 1   },
   starter: { posts: 10, articulos: 5,  directorios: 5,  keywordsPrimarias: 5,  keywordsLongTail: 3,  acciones: 5,  analyses: 20  },
   growth:  { posts: 25, articulos: 12, directorios: 15, keywordsPrimarias: 10, keywordsLongTail: 8,  acciones: 10, analyses: 60  },
   agency:  { posts: 25, articulos: 12, directorios: 20, keywordsPrimarias: 10, keywordsLongTail: 8,  acciones: 10, analyses: 100 },
+};
+
+// Mapa de tipo de negocio seleccionado → nicho
+const BUSINESS_TYPE_TO_NICHE = {
+  ecommerce: "ecommerce",
+  saas:      "saas",
+  local:     "local",
+  agency:    "agency",
+  health:    "health",
+  general:   "general",
 };
 
 export default async function handler(req, res) {
@@ -63,21 +72,29 @@ export default async function handler(req, res) {
 
   const limits = PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
 
-  // Deteccion de nicho
-  const NICHES = {
-    ecommerce: ["merch", "shop", "store", "tienda", "buy", "beer", "clothing", "apparel"],
-    saas: ["app", "software", "platform", "dashboard", "api", "tool", "service"],
-    local: ["restaurant", "cafe", "salon", "gym", "clinic", "dental", "hotel"],
-    agency: ["agency", "marketing", "design", "consulting", "studio"],
-  };
+  // Detección de nicho — el tipo de negocio seleccionado tiene prioridad
+  // Si el usuario eligió algo específico, usarlo directamente
+  let niche = BUSINESS_TYPE_TO_NICHE[businessType] || "general";
 
-  const lower = (url + " " + (description || "")).toLowerCase();
-  let niche = "general";
-  for (const [n, keywords] of Object.entries(NICHES)) {
-    if (keywords.some((k) => lower.includes(k))) { niche = n; break; }
+  // Solo usar detección automática si el tipo es "general"
+  if (niche === "general") {
+    const NICHES = {
+      health:    ["health", "salud", "bienestar", "clinic", "medical", "wellness", "preventiva", "doctor", "farmacia", "nutricion", "psicolog"],
+      saas:      ["app", "software", "platform", "dashboard", "api", "tool", "service", "tech", "digital", "cloud", "sistema"],
+      ecommerce: ["merch", "shop", "store", "tienda", "buy", "beer", "clothing", "apparel", "moda", "zapatos", "productos"],
+      local:     ["restaurant", "cafe", "salon", "gym", "clinic", "dental", "hotel", "spa", "taller", "plomero"],
+      agency:    ["agency", "marketing", "design", "consulting", "studio", "agencia", "publicidad"],
+    };
+
+    const lower = (url + " " + (description || "")).toLowerCase();
+    for (const [n, keywords] of Object.entries(NICHES)) {
+      if (keywords.some((k) => lower.includes(k))) {
+        niche = n;
+        break;
+      }
+    }
   }
 
-  // Construir prompt con limites exactos segun plan
   const systemPrompt = `Eres un experto en marketing digital, SEO, y generacion de trafico organico para negocios latinoamericanos.
 Genera un plan de trafico REAL y ESPECIFICO basado en la informacion del negocio.
 Responde UNICAMENTE en JSON valido, sin markdown, sin backticks, sin texto extra.
@@ -87,6 +104,7 @@ IMPORTANTE:
 - competencia.nivel: maximo 2 palabras  
 - competencia.oportunidad: maximo 8 palabras
 - Genera EXACTAMENTE el numero de items indicado en cada array
+- El plan debe ser 100% especifico para el tipo de negocio y nicho indicado
 
 El JSON debe tener EXACTAMENTE esta estructura con estos conteos:
 {
@@ -122,13 +140,20 @@ Descripcion: ${description || "Sin descripcion adicional"}
 Nicho detectado: ${niche}
 Plan del usuario: ${userPlan}
 
+IMPORTANTE: El plan debe ser completamente especifico para el nicho "${niche}".
+Si el nicho es "health", enfocate en salud, bienestar y prevencion.
+Si el nicho es "saas", enfocate en software, tecnologia y soluciones digitales.
+Si el nicho es "local", enfocate en busquedas locales y Google My Business.
+Si el nicho es "agency", enfocate en servicios B2B y generacion de leads.
+Si el nicho es "ecommerce", enfocate en productos, compras y conversion.
+
 Genera:
-- ${limits.keywordsPrimarias} keywords primarias REALES para este nicho
-- ${limits.keywordsLongTail} keywords long tail especificas
+- ${limits.keywordsPrimarias} keywords primarias REALES para este nicho especifico
+- ${limits.keywordsLongTail} keywords long tail especificas para este nicho
 - ${limits.posts} posts con captions REALES listos para publicar (mezcla Instagram y Facebook)
 - ${limits.articulos} articulos SEO con estructura real y meta descriptions
-- ${limits.directorios} directorios donde REALMENTE debe aparecer este negocio
-- ${limits.acciones} acciones inmediatas prioritarias`;
+- ${limits.directorios} directorios donde REALMENTE debe aparecer este tipo de negocio
+- ${limits.acciones} acciones inmediatas prioritarias para este nicho`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -157,27 +182,22 @@ Genera:
     const clean = raw.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
 
-    // Agregar metadata del plan al response
     parsed._plan = userPlan;
     parsed._limits = limits;
 
-    // Guardar en historial e incrementar contador — solo para usuarios logueados
     if (userId) {
-      // 1. Guardar análisis con campo site_url correcto
       const { error: insertError } = await supabase
         .from("analyses")
         .insert({
           user_id: userId,
-          site_url: url,        // campo correcto en la tabla
+          site_url: url,
           plan_data: parsed,
         });
 
       if (insertError) {
         console.error("Error guardando análisis:", insertError);
-        // No bloqueamos el response — el plan ya se generó
       }
 
-      // 2. Incrementar contador de análisis usados
       const { error: rpcError } = await supabase
         .rpc("increment_analyses_used", { user_id: userId });
 

@@ -1,6 +1,5 @@
 // pages/api/webhook.js
 // Recibe eventos de Stripe y actualiza el plan del usuario en Supabase
-// Ahora también envía emails transaccionales via Resend
 
 import { createClient } from "@supabase/supabase-js";
 
@@ -15,7 +14,13 @@ const PLAN_CONFIG = {
   agency:  { analyses_limit: 100, sites_limit: 10 },
 };
 
+// ── Price IDs actualizados — MXN (activos) + USD (legacy, por si acaso) ──────
 const PRICE_TO_PLAN = {
+  // MXN — precios activos
+  "price_1TVcxnJK0PaCWmjfm8RbZtsE": "starter",
+  "price_1TVcypJK0PaCWmjfgzYwv67U": "growth",
+  "price_1TVd03JK0PaCWmjfRF4Ws6WZ": "agency",
+  // USD — legacy, por si hay suscripciones antiguas
   "price_1TSH9gJK0PaCWmjf2j4Hq5DC": "starter",
   "price_1TSHAWJK0PaCWmjfHRUHo0eF": "growth",
   "price_1TSHBMJK0PaCWmjf0PMaLQiw": "agency",
@@ -40,6 +45,25 @@ async function sendEmail(type, to, data = {}) {
   }
 }
 
+// ── Obtiene el priceId de una sesión expandiendo line_items via API ───────────
+async function getPriceIdFromSession(sessionId) {
+  try {
+    const res = await fetch(
+      `https://api.stripe.com/v1/checkout/sessions/${sessionId}?expand[]=line_items`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+        },
+      }
+    );
+    const session = await res.json();
+    return session.line_items?.data?.[0]?.price?.id || null;
+  } catch (err) {
+    console.error("Error obteniendo line_items:", err);
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -61,10 +85,9 @@ export default async function handler(req, res) {
         const customerId = session.customer;
         const subscriptionId = session.subscription;
 
-        let priceId = null;
-        if (session.line_items?.data?.length > 0) {
-          priceId = session.line_items.data[0]?.price?.id;
-        }
+        // FIX: expandir line_items via API para obtener el priceId real
+        const priceId = await getPriceIdFromSession(session.id);
+        console.log(`checkout.session.completed — email: ${customerEmail}, priceId: ${priceId}`);
 
         const plan = PRICE_TO_PLAN[priceId] || "starter";
         const config = PLAN_CONFIG[plan];
@@ -87,7 +110,6 @@ export default async function handler(req, res) {
             console.error("Error actualizando usuario:", error);
           } else {
             console.log(`Plan actualizado: ${customerEmail} -> ${plan}`);
-            // Enviar email de plan activado
             await sendEmail("plan_activated", customerEmail, {
               plan,
               features: PLAN_FEATURES[plan],

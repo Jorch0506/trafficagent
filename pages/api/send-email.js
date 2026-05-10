@@ -3,7 +3,7 @@
 // Tipos: welcome, plan_activated, limit_warning
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = "CAEVIK <hola@caevik.com>";
+const FROM_EMAIL = "CAEVIK <hola@send.caevik.com>";
 
 // ── Templates HTML ────────────────────────────────────────────────────────────
 
@@ -27,7 +27,7 @@ function baseTemplate(content) {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td>
-                    <span style="font-size:22px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;color:#38bdf8;">CAEVIK</span>
+                    <span style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#38bdf8;">CAEVIK</span>
                   </td>
                   <td align="right">
                     <span style="font-size:11px;color:#1e293b;letter-spacing:1px;text-transform:uppercase;">AI Traffic Agent</span>
@@ -66,13 +66,18 @@ function baseTemplate(content) {
 </html>`;
 }
 
+// Extrae un nombre legible del email: "jorch22@yahoo.com" → "jorch22"
+function nameFromEmail(email) {
+  return (email || "").split("@")[0] || "usuario";
+}
+
 // Email 1 — Bienvenida al registrarse
-function welcomeEmail(firstName) {
+function welcomeEmail(name) {
   return baseTemplate(`
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">👋</div>
       <h1 style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-1px;margin:0 0 12px 0;line-height:1.2;">
-        Bienvenido a CAEVIK,<br>${firstName}
+        Bienvenido a CAEVIK,<br>${name}
       </h1>
       <p style="font-size:15px;color:#475569;line-height:1.7;margin:0;">
         Tu agente de tráfico orgánico con IA está listo.<br>
@@ -109,31 +114,32 @@ function welcomeEmail(firstName) {
 }
 
 // Email 2 — Plan activado después del pago
-function planActivatedEmail(firstName, plan, features) {
+function planActivatedEmail(name, plan, features) {
   const planColors = {
     starter: "#38bdf8",
     growth:  "#f59e0b",
     agency:  "#e879f9",
   };
   const color = planColors[plan] || "#38bdf8";
+  const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
 
   return baseTemplate(`
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">🎉</div>
       <h1 style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-1px;margin:0 0 12px 0;line-height:1.2;">
-        ¡Plan activado, ${firstName}!
+        ¡Plan activado, ${name}!
       </h1>
       <p style="font-size:15px;color:#475569;line-height:1.7;margin:0;">
         Tu plan está activo. Empieza a generar planes de tráfico ahora mismo.
       </p>
     </div>
 
-    <div style="background:rgba(255,255,255,0.02);border:1px solid ${color}30;border-radius:12px;padding:28px;margin-bottom:32px;text-align:center;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:${color};text-transform:uppercase;margin-bottom:8px;">Plan activo</div>
-      <div style="font-size:32px;font-weight:800;color:${color};text-transform:capitalize;margin-bottom:16px;">${plan}</div>
-      ${features.map(f => `
-        <div style="font-size:14px;color:#64748b;margin-bottom:8px;text-align:left;display:flex;align-items:center;gap:10px;">
-          <span style="color:${color};">✓</span> ${f}
+    <div style="background:rgba(255,255,255,0.02);border:1px solid ${color}30;border-radius:12px;padding:28px;margin-bottom:32px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:${color};text-transform:uppercase;margin-bottom:8px;text-align:center;">Plan activo</div>
+      <div style="font-size:32px;font-weight:800;color:${color};text-align:center;margin-bottom:20px;">${planName}</div>
+      ${(features || []).map(f => `
+        <div style="font-size:14px;color:#64748b;margin-bottom:8px;">
+          <span style="color:${color};">✓</span> &nbsp;${f}
         </div>
       `).join("")}
     </div>
@@ -151,8 +157,9 @@ function planActivatedEmail(firstName, plan, features) {
 }
 
 // Email 3 — Advertencia de límite al 80%
-function limitWarningEmail(firstName, plan, used, limit) {
+function limitWarningEmail(name, plan, used, limit) {
   const remaining = limit - used;
+  const pct = Math.round((used / limit) * 100);
   return baseTemplate(`
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
@@ -164,15 +171,16 @@ function limitWarningEmail(firstName, plan, used, limit) {
       </p>
     </div>
 
-    <!-- Barra de progreso -->
     <div style="margin-bottom:32px;">
       <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:8px;overflow:hidden;margin-bottom:8px;">
-        <div style="width:${Math.round((used/limit)*100)}%;height:100%;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:999px;"></div>
+        <div style="width:${pct}%;height:100%;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:999px;"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;">
-        <span style="font-size:12px;color:#475569;">${used} usados</span>
-        <span style="font-size:12px;color:#475569;">${limit} total</span>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="font-size:12px;color:#475569;">${used} usados</td>
+          <td align="right" style="font-size:12px;color:#475569;">${limit} total</td>
+        </tr>
+      </table>
     </div>
 
     <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:24px;margin-bottom:32px;">
@@ -212,22 +220,25 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "type y to son requeridos" });
   }
 
+  // Usa firstName si viene, si no extrae del email
+  const name = firstName || nameFromEmail(to);
+
   let subject, html;
 
   switch (type) {
     case "welcome":
       subject = "Bienvenido a CAEVIK — Tu primer plan te espera";
-      html = welcomeEmail(firstName || to.split("@")[0]);
+      html = welcomeEmail(name);
       break;
 
     case "plan_activated":
-      subject = `Plan ${plan} activado — ¡Empieza a generar tráfico!`;
-      html = planActivatedEmail(firstName || to.split("@")[0], plan, features || []);
+      subject = `Plan ${plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : ""} activado — ¡Empieza a generar tráfico!`;
+      html = planActivatedEmail(name, plan, features || []);
       break;
 
     case "limit_warning":
       subject = `Te quedan ${limit - used} análisis este mes`;
-      html = limitWarningEmail(firstName || to.split("@")[0], plan, used, limit);
+      html = limitWarningEmail(name, plan, used, limit);
       break;
 
     default:

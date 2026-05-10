@@ -1,5 +1,5 @@
 // hooks/useAuth.js
-// Maneja la sesión del usuario y sus datos completos desde Supabase
+// Maneja sesión, datos del usuario y estado de onboarding
 
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -11,13 +11,13 @@ export const supabase = createClient(
 
 export function useAuth() {
   const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState(null); // datos completos de la tabla users
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchUserData = async (userId) => {
     const { data, error } = await supabase
       .from("users")
-      .select("plan, analyses_used, analyses_limit, subscription_status")
+      .select("plan, analyses_used, analyses_limit, subscription_status, onboarding_completed")
       .eq("id", userId)
       .single();
 
@@ -29,7 +29,6 @@ export function useAuth() {
   };
 
   useEffect(() => {
-    // Obtener sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
@@ -38,7 +37,6 @@ export function useAuth() {
       setLoading(false);
     });
 
-    // Escuchar cambios de sesión
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
@@ -58,19 +56,20 @@ export function useAuth() {
     setUserData(null);
   };
 
-  // Exponer datos individuales para conveniencia
-  const userPlan = userData?.plan || "free";
-  const analysesUsed = userData?.analyses_used ?? 0;
-  const analysesLimit = userData?.analyses_limit ?? 1;
+  const markOnboardingComplete = () => {
+    setUserData(prev => prev ? { ...prev, onboarding_completed: true } : prev);
+  };
 
   return {
     user,
     userData,
-    userPlan,
-    analysesUsed,
-    analysesLimit,
+    userPlan:          userData?.plan || "free",
+    analysesUsed:      userData?.analyses_used ?? 0,
+    analysesLimit:     userData?.analyses_limit ?? 1,
+    onboardingDone:    userData?.onboarding_completed ?? true, // true por defecto para no mostrar a usuarios existentes mientras carga
     loading,
     logout,
-    refetchUserData: () => user?.id && fetchUserData(user.id),
+    markOnboardingComplete,
+    refetchUserData:   () => user?.id && fetchUserData(user.id),
   };
 }

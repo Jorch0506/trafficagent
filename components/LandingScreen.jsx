@@ -54,6 +54,7 @@ function GlassCard({ children, style = {}, className = "" }) {
   );
 }
 
+// ── SOLO ESTO CAMBIÓ: precios en MXN ─────────────────────────────────────────
 const PLANS = [
   {
     id: "free", name: "Free", price: "$0", period: "",
@@ -63,21 +64,21 @@ const PLANS = [
     cta: "Empezar gratis",
   },
   {
-    id: "starter", name: "Starter", price: "$29", period: "/mes",
+    id: "starter", name: "Starter", price: "$699", period: "MXN/mes",
     color: "#38bdf8", gradient: "linear-gradient(135deg, #38bdf8, #818cf8)",
     label: "Para emprendedores",
     features: ["20 análisis / mes", "10 posts listos", "5 artículos SEO", "5 directorios", "Soporte email"],
     cta: "Activar Starter",
   },
   {
-    id: "growth", name: "Growth", price: "$99", period: "/mes",
+    id: "growth", name: "Growth", price: "$1,999", period: "MXN/mes",
     color: "#f59e0b", gradient: "linear-gradient(135deg, #f59e0b, #ef4444)",
     label: "Para negocios", popular: true,
     features: ["60 análisis / mes", "25 posts listos", "12 artículos SEO", "3 sitios web", "10 keywords primarias"],
     cta: "Activar Growth",
   },
   {
-    id: "agency", name: "Agency", price: "$299", period: "/mes",
+    id: "agency", name: "Agency", price: "$5,999", period: "MXN/mes",
     color: "#e879f9", gradient: "linear-gradient(135deg, #e879f9, #818cf8)",
     label: "Para agencias",
     features: ["100 análisis / mes", "10 sitios web", "20 directorios", "Manager dedicado", "API próximamente"],
@@ -153,7 +154,6 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="hero-section" style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 48px 80px", position: "relative", zIndex: 10 }}>
-
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)", borderRadius: 999, padding: "6px 16px", marginBottom: 40 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block", boxShadow: "0 0 8px #4ade80", animation: "pulse 2s infinite", flexShrink: 0 }} />
           <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#94a3b8", textTransform: "uppercase" }}>Beta privada activa — acceso gratuito hoy</span>
@@ -161,78 +161,38 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
 
         <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 60, alignItems: "start" }}>
           <div>
-            {/* FIX CLAVE: clamp() en inline style — no depende de media query */}
-            <h1 style={{
-              fontFamily: "'Syne', sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(34px, 7vw, 72px)",
-              lineHeight: 1.08,
-              letterSpacing: "clamp(-1px, -0.04em, -3px)",
-              marginBottom: 28,
-              wordBreak: "break-word",
-              overflowWrap: "break-word",
-            }}>
+            <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(34px, 7vw, 72px)", lineHeight: 1.08, letterSpacing: "clamp(-1px, -0.04em, -3px)", marginBottom: 28, wordBreak: "break-word", overflowWrap: "break-word" }}>
               <span style={{ display: "block", color: "#f1f5f9" }}>Tráfico orgánico</span>
               <span style={{ display: "block", color: "#f1f5f9" }}>para tu negocio</span>
-              <span style={{ display: "block", background: "linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #e879f9 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                en 60 segundos.
-              </span>
+              <span style={{ display: "block", background: "linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #e879f9 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>en 60 segundos.</span>
             </h1>
-
             <p style={{ fontSize: "clamp(14px, 2.5vw, 17px)", color: "#64748b", lineHeight: 1.8, maxWidth: 520, marginBottom: 16 }}>
               Ingresa la URL de tu negocio y nuestra IA genera un plan completo de <strong style={{ color: "#94a3b8" }}>keywords, posts para redes sociales y artículos SEO</strong> listos para publicar.
             </p>
-
             <div style={{ display: "flex", gap: 20, marginBottom: 40, flexWrap: "wrap" }}>
               {["✓ Sin conocimientos técnicos", "✓ En español", "✓ Listo para publicar"].map(t => (
                 <span key={t} style={{ fontSize: 13, color: "#475569", fontWeight: 500 }}>{t}</span>
               ))}
             </div>
-
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
-              <button
-                onClick={onStart}
-                style={{
-                  padding: "16px 40px",
-                  background: "linear-gradient(135deg, #38bdf8, #818cf8)",
-                  border: "none",
-                  borderRadius: 10,
-                  color: "#03060f",
-                  fontWeight: 800,
-                  fontSize: 16,
-                  cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                  letterSpacing: 0.3,
-                  boxShadow: "0 0 32px rgba(56,189,248,0.3), 0 4px 16px rgba(0,0,0,0.4)",
-                  transition: "all 0.2s ease",
-                  whiteSpace: "nowrap",
-                }}
+              <button onClick={onStart} style={{ padding: "16px 40px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 10, color: "#03060f", fontWeight: 800, fontSize: 16, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.3, boxShadow: "0 0 32px rgba(56,189,248,0.3), 0 4px 16px rgba(0,0,0,0.4)", transition: "all 0.2s ease", whiteSpace: "nowrap" }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 48px rgba(56,189,248,0.4), 0 8px 24px rgba(0,0,0,0.4)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(56,189,248,0.3), 0 4px 16px rgba(0,0,0,0.4)"; }}
-              >
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(56,189,248,0.3), 0 4px 16px rgba(0,0,0,0.4)"; }}>
                 Generar mi plan gratis →
               </button>
               <span style={{ fontSize: 13, color: "#334155" }}>Sin tarjeta · 60 segundos</span>
             </div>
           </div>
 
-          {/* Panel derecho — oculto en móvil via CSS */}
           <GlassCard className="hero-panel" style={{ padding: 28, marginTop: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#38bdf8", textTransform: "uppercase", marginBottom: 20 }}>Generando plan para</div>
             <div style={{ height: 36, overflow: "hidden", position: "relative", marginBottom: 20 }}>
               {NICHES.map((n, i) => (
-                <div key={n} style={{ position: "absolute", top: 0, left: 0, fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 22, color: i === activeNiche ? "#f1f5f9" : "transparent", transform: `translateY(${(i - activeNiche) * 36}px)`, transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)", pointerEvents: "none" }}>
-                  {n}
-                </div>
+                <div key={n} style={{ position: "absolute", top: 0, left: 0, fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 22, color: i === activeNiche ? "#f1f5f9" : "transparent", transform: `translateY(${(i - activeNiche) * 36}px)`, transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)", pointerEvents: "none" }}>{n}</div>
               ))}
             </div>
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              {[
-                { n: "25", label: "Posts sociales", color: "#38bdf8" },
-                { n: "12", label: "Artículos SEO", color: "#4ade80" },
-                { n: "20", label: "Directorios", color: "#f59e0b" },
-                { n: "10", label: "Keywords", color: "#e879f9" },
-              ].map(d => (
+              {[{ n: "25", label: "Posts sociales", color: "#38bdf8" }, { n: "12", label: "Artículos SEO", color: "#4ade80" }, { n: "20", label: "Directorios", color: "#f59e0b" }, { n: "10", label: "Keywords", color: "#e879f9" }].map(d => (
                 <div key={d.label}>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, color: d.color, lineHeight: 1 }}>{d.n}</div>
                   <div style={{ fontSize: 11, color: "#475569", marginTop: 3 }}>{d.label}</div>
@@ -255,9 +215,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 48, color: "rgba(56,189,248,0.12)", lineHeight: 1, marginBottom: 20, letterSpacing: -2 }}>{s.n}</div>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 10, color: "#f1f5f9" }}>{s.title}</div>
               <div style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7 }}>{s.desc}</div>
-              {i < 2 && (
-                <div className="steps-arrow" style={{ position: "absolute", right: -12, top: "50%", transform: "translateY(-50%)", color: "#1e293b", fontSize: 20, zIndex: 2 }}>→</div>
-              )}
+              {i < 2 && <div className="steps-arrow" style={{ position: "absolute", right: -12, top: "50%", transform: "translateY(-50%)", color: "#1e293b", fontSize: 20, zIndex: 2 }}>→</div>}
             </GlassCard>
           ))}
         </div>
@@ -292,15 +250,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         <GlassCard style={{ padding: "56px 64px" }} className="glass-who">
           <div className="who-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
             <div>
-              <h2 style={{
-                fontFamily: "'Syne', sans-serif",
-                fontWeight: 800,
-                fontSize: "clamp(24px, 4vw, 34px)",
-                letterSpacing: "clamp(-0.5px, -0.02em, -1px)",
-                marginBottom: 20,
-                lineHeight: 1.2,
-                wordBreak: "break-word",
-              }}>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(24px, 4vw, 34px)", letterSpacing: "clamp(-0.5px, -0.02em, -1px)", marginBottom: 20, lineHeight: 1.2, wordBreak: "break-word" }}>
                 ¿Para quién es CAEVIK?
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -325,12 +275,9 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
                 ))}
               </div>
               <div style={{ marginTop: 24 }}>
-                <button
-                  onClick={onStart}
-                  style={{ padding: "13px 28px", background: "transparent", border: "1px solid rgba(56,189,248,0.4)", borderRadius: 8, color: "#38bdf8", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s ease" }}
+                <button onClick={onStart} style={{ padding: "13px 28px", background: "transparent", border: "1px solid rgba(56,189,248,0.4)", borderRadius: 8, color: "#38bdf8", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s ease" }}
                   onMouseEnter={e => { e.currentTarget.style.background = "rgba(56,189,248,0.08)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
-                >
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
                   Probar con mi negocio gratis →
                 </button>
               </div>
@@ -347,31 +294,18 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         </div>
         <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {PLANS.map(plan => (
-            <div
-              key={plan.id}
-              style={{
-                position: "relative",
-                background: plan.popular ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
-                border: plan.popular ? `1px solid ${plan.color}44` : "1px solid rgba(255,255,255,0.06)",
-                borderRadius: 16,
-                padding: "32px 24px",
-                backdropFilter: "blur(12px)",
-                boxShadow: plan.popular ? `0 0 40px ${plan.color}18` : "none",
-              }}
-            >
+            <div key={plan.id} style={{ position: "relative", background: plan.popular ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)", border: plan.popular ? `1px solid ${plan.color}44` : "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: "32px 24px", backdropFilter: "blur(12px)", boxShadow: plan.popular ? `0 0 40px ${plan.color}18` : "none" }}>
               {plan.popular && (
                 <>
                   <div style={{ position: "absolute", top: -1, left: -1, right: -1, height: 3, background: plan.gradient, borderRadius: "16px 16px 0 0" }} />
-                  <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: plan.gradient, color: "#03060f", fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 999, letterSpacing: 1.5, whiteSpace: "nowrap", textTransform: "uppercase" }}>
-                    Más popular
-                  </div>
+                  <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: plan.gradient, color: "#03060f", fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 999, letterSpacing: 1.5, whiteSpace: "nowrap", textTransform: "uppercase" }}>Más popular</div>
                 </>
               )}
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, color: plan.color, textTransform: "uppercase", marginBottom: 8 }}>{plan.label}</div>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, marginBottom: 16 }}>{plan.name}</div>
-              <div style={{ marginBottom: 24, display: "flex", alignItems: "baseline", gap: 4 }}>
+              <div style={{ marginBottom: 24, display: "flex", alignItems: "baseline", gap: 4, flexWrap: "wrap" }}>
                 <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 36, background: plan.gradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{plan.price}</span>
-                <span style={{ fontSize: 13, color: "#334155" }}>{plan.period}</span>
+                <span style={{ fontSize: 12, color: "#334155", lineHeight: 1.3 }}>{plan.period}</span>
               </div>
               <div style={{ marginBottom: 28 }}>
                 {plan.features.map(f => (
@@ -381,34 +315,17 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => handlePlanClick(plan.id)}
-                disabled={loadingPlan === plan.id}
-                style={{
-                  width: "100%", padding: "11px",
-                  background: plan.popular ? plan.gradient : "transparent",
-                  border: `1px solid ${plan.popular ? "transparent" : plan.color + "44"}`,
-                  borderRadius: 8,
-                  color: plan.popular ? "#03060f" : plan.color,
-                  fontWeight: 700, fontSize: 13,
-                  cursor: loadingPlan === plan.id ? "not-allowed" : "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                  opacity: loadingPlan === plan.id ? 0.7 : 1,
-                  transition: "all 0.2s ease",
-                }}
+              <button onClick={() => handlePlanClick(plan.id)} disabled={loadingPlan === plan.id}
+                style={{ width: "100%", padding: "11px", background: plan.popular ? plan.gradient : "transparent", border: `1px solid ${plan.popular ? "transparent" : plan.color + "44"}`, borderRadius: 8, color: plan.popular ? "#03060f" : plan.color, fontWeight: 700, fontSize: 13, cursor: loadingPlan === plan.id ? "not-allowed" : "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loadingPlan === plan.id ? 0.7 : 1, transition: "all 0.2s ease" }}
                 onMouseEnter={e => { if (!plan.popular) e.currentTarget.style.background = plan.color + "10"; }}
-                onMouseLeave={e => { if (!plan.popular) e.currentTarget.style.background = "transparent"; }}
-              >
+                onMouseLeave={e => { if (!plan.popular) e.currentTarget.style.background = "transparent"; }}>
                 {loadingPlan === plan.id ? "Procesando..." : plan.cta}
               </button>
             </div>
           ))}
         </div>
-
         <div style={{ textAlign: "center", marginTop: 32 }}>
-          <span style={{ fontSize: 13, color: "#334155" }}>
-            🔒 Sin contratos · Cancela en cualquier momento · Pago seguro con Stripe
-          </span>
+          <span style={{ fontSize: 13, color: "#334155" }}>🔒 Sin contratos · Cancela en cualquier momento · Pago seguro con Stripe</span>
         </div>
       </section>
 
@@ -419,22 +336,12 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {FAQ.map((item, i) => (
-            <div
-              key={i}
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, overflow: "hidden", transition: "all 0.2s ease" }}
-            >
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                style={{ width: "100%", padding: "20px 24px", background: "transparent", border: "none", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}
-              >
+            <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, overflow: "hidden", transition: "all 0.2s ease" }}>
+              <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: "100%", padding: "20px 24px", background: "transparent", border: "none", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
                 <span style={{ fontSize: "clamp(13px, 2vw, 15px)", fontWeight: 600, color: "#e2e8f0" }}>{item.q}</span>
                 <span style={{ color: "#38bdf8", fontSize: 20, flexShrink: 0, transform: openFaq === i ? "rotate(45deg)" : "rotate(0)", transition: "transform 0.2s ease" }}>+</span>
               </button>
-              {openFaq === i && (
-                <div style={{ padding: "0 24px 20px", fontSize: 14, color: "#64748b", lineHeight: 1.8 }}>
-                  {item.a}
-                </div>
-              )}
+              {openFaq === i && <div style={{ padding: "0 24px 20px", fontSize: 14, color: "#64748b", lineHeight: 1.8 }}>{item.a}</div>}
             </div>
           ))}
         </div>
@@ -442,48 +349,16 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
 
       {/* ── CTA FINAL ────────────────────────────────────────────────────── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 120px", position: "relative", zIndex: 10 }}>
-        <div className="cta-section" style={{
-          background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))",
-          border: "1px solid rgba(56,189,248,0.15)",
-          borderRadius: 24,
-          padding: "80px 64px",
-          textAlign: "center",
-          overflow: "hidden",
-        }}>
-          {/* FIX CRÍTICO: clamp() directo en inline style */}
-          <h2 style={{
-            fontFamily: "'Syne', sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(28px, 5.5vw, 44px)",
-            letterSpacing: "clamp(-0.5px, -0.03em, -2px)",
-            marginBottom: 16,
-            lineHeight: 1.1,
-            wordBreak: "break-word",
-            overflowWrap: "break-word",
-          }}>
+        <div className="cta-section" style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))", border: "1px solid rgba(56,189,248,0.15)", borderRadius: 24, padding: "80px 64px", textAlign: "center", overflow: "hidden" }}>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5.5vw, 44px)", letterSpacing: "clamp(-0.5px, -0.03em, -2px)", marginBottom: 16, lineHeight: 1.1, wordBreak: "break-word", overflowWrap: "break-word" }}>
             Tu competencia ya<br />está generando tráfico.
           </h2>
           <p style={{ fontSize: "clamp(14px, 2vw, 16px)", color: "#64748b", marginBottom: 40, maxWidth: 480, margin: "0 auto 40px" }}>
             Genera tu primer plan de tráfico orgánico ahora mismo. Gratis. Sin tarjeta. En 60 segundos.
           </p>
-          <button
-            onClick={onStart}
-            style={{
-              padding: "18px 48px",
-              background: "linear-gradient(135deg, #38bdf8, #818cf8)",
-              border: "none",
-              borderRadius: 12,
-              color: "#03060f",
-              fontWeight: 800,
-              fontSize: "clamp(14px, 2.5vw, 17px)",
-              cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif",
-              boxShadow: "0 0 48px rgba(56,189,248,0.3)",
-              transition: "all 0.2s ease",
-            }}
+          <button onClick={onStart} style={{ padding: "18px 48px", background: "linear-gradient(135deg, #38bdf8, #818cf8)", border: "none", borderRadius: 12, color: "#03060f", fontWeight: 800, fontSize: "clamp(14px, 2.5vw, 17px)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", boxShadow: "0 0 48px rgba(56,189,248,0.3)", transition: "all 0.2s ease" }}
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 64px rgba(56,189,248,0.4)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 0 48px rgba(56,189,248,0.3)"; }}
-          >
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 0 48px rgba(56,189,248,0.3)"; }}>
             Generar mi plan gratis →
           </button>
           <div style={{ marginTop: 20, fontSize: 13, color: "#334155" }}>Sin tarjeta · 60 segundos · Cancela cuando quieras</div>
@@ -504,58 +379,23 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
         @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 8px #4ade80} 50%{opacity:0.6;box-shadow:0 0 4px #4ade80} }
-
         *, *::before, *::after { box-sizing: border-box; }
-
         @media (max-width: 768px) {
-          /* Hero */
-          .hero-section {
-            padding-top: 60px !important;
-            padding-bottom: 48px !important;
-            padding-left: 20px !important;
-            padding-right: 20px !important;
-          }
+          .hero-section { padding-top: 60px !important; padding-bottom: 48px !important; padding-left: 20px !important; padding-right: 20px !important; }
           .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .hero-panel { display: none !important; }
-
-          /* Sections padding */
-          .section-pad {
-            padding-left: 20px !important;
-            padding-right: 20px !important;
-          }
+          .section-pad { padding-left: 20px !important; padding-right: 20px !important; }
           nav { padding: 16px 20px !important; }
-
-          /* Steps */
           .steps-grid { grid-template-columns: 1fr !important; }
           .steps-arrow { display: none !important; }
-
-          /* Includes */
           .includes-grid { grid-template-columns: 1fr !important; }
-
-          /* Para quién */
           .who-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
           .glass-who { padding: 28px 20px !important; }
-
-          /* Pricing — 2 columnas en móvil (más legible que 1) */
           .pricing-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
-
-          /* CTA final */
-          .cta-section {
-            padding: 40px 24px !important;
-            border-radius: 16px !important;
-          }
-
-          /* Footer */
-          footer {
-            padding: 24px 20px !important;
-            flex-direction: column !important;
-            text-align: center !important;
-            gap: 12px !important;
-          }
+          .cta-section { padding: 40px 24px !important; border-radius: 16px !important; }
+          footer { padding: 24px 20px !important; flex-direction: column !important; text-align: center !important; gap: 12px !important; }
         }
-
         @media (max-width: 420px) {
-          /* Pricing a 1 columna en pantallas muy pequeñas */
           .pricing-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>

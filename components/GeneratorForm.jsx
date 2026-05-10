@@ -25,7 +25,7 @@ export function GeneratorForm({ onSubmit, loading, error, onClearError }) {
     url: "",
     instagram: "",
     facebook: "",
-    businessType: "ecommerce",
+    businessType: "general",
     description: "",
   });
   const [urlError, setUrlError] = useState("");
@@ -126,10 +126,48 @@ export function GeneratorForm({ onSubmit, loading, error, onClearError }) {
             )}
           </div>
 
-          {/* Campos opcionales */}
+          {/* Tipo de negocio — va antes de los opcionales para dar contexto */}
+          <div style={{ marginBottom: "var(--space-5)" }}>
+            <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "var(--space-2)" }}>
+              🏢 Tipo de negocio <span style={{ color: "var(--brand-danger)" }}>*</span>
+            </label>
+            <select
+              value={form.businessType}
+              onChange={e => update("businessType", e.target.value)}
+              style={{ ...inp, cursor: "pointer" }}
+            >
+              {[
+                ["general",   "Selecciona tu tipo de negocio..."],
+                ["ecommerce", "E-commerce / Tienda online"],
+                ["saas",      "SaaS / App / Tecnología"],
+                ["health",    "Salud / Bienestar / Health Tech"],
+                ["local",     "Negocio físico / Local"],
+                ["agency",    "Agencia / Servicios / Consultoría"],
+              ].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </div>
+
+          {/* Descripción — más prominente para mejorar la calidad del plan */}
+          <div style={{ marginBottom: "var(--space-5)" }}>
+            <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "var(--space-2)" }}>
+              📝 Describe tu negocio
+              <span style={{ fontWeight: 400, color: "var(--text-muted)", marginLeft: 6 }}>— mejora la precisión del plan</span>
+            </label>
+            <textarea
+              value={form.description}
+              onChange={e => update("description", e.target.value)}
+              placeholder="Ej: Plataforma de salud preventiva para empresas en México. Ofrecemos análisis de bienestar laboral y programas de prevención."
+              rows={3}
+              style={{ ...inp, resize: "vertical", lineHeight: 1.6 }}
+              onFocus={e => e.target.style.borderColor = "var(--brand-primary)"}
+              onBlur={e => e.target.style.borderColor = "var(--bg-border)"}
+            />
+          </div>
+
+          {/* Campos opcionales de redes sociales */}
           {[
             { key: "instagram", label: "📸 Instagram (opcional)", placeholder: "@tuusuario" },
-            { key: "facebook", label: "📘 Facebook (opcional)", placeholder: "facebook.com/tupagina" },
+            { key: "facebook",  label: "📘 Facebook (opcional)",  placeholder: "facebook.com/tupagina" },
           ].map(({ key, label, placeholder }) => (
             <div key={key} style={{ marginBottom: "var(--space-5)" }}>
               <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "var(--space-2)" }}>
@@ -145,40 +183,6 @@ export function GeneratorForm({ onSubmit, loading, error, onClearError }) {
               />
             </div>
           ))}
-
-          <div style={{ marginBottom: "var(--space-5)" }}>
-            <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "var(--space-2)" }}>
-              🏢 Tipo de negocio
-            </label>
-            <select
-              value={form.businessType}
-              onChange={e => update("businessType", e.target.value)}
-              style={{ ...inp, cursor: "pointer" }}
-            >
-              {[
-                ["ecommerce", "E-commerce / Tienda online"],
-                ["saas", "SaaS / Aplicación web"],
-                ["local", "Negocio físico / Local"],
-                ["agency", "Agencia / Servicios"],
-                ["general", "Otro"],
-              ].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-          </div>
-
-          <div style={{ marginBottom: "var(--space-6)" }}>
-            <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "var(--space-2)" }}>
-              📝 Describe tu negocio (opcional)
-            </label>
-            <textarea
-              value={form.description}
-              onChange={e => update("description", e.target.value)}
-              placeholder="Qué vendes, a quién, en qué mercado..."
-              rows={3}
-              style={{ ...inp, resize: "vertical", lineHeight: 1.6 }}
-              onFocus={e => e.target.style.borderColor = "var(--brand-primary)"}
-              onBlur={e => e.target.style.borderColor = "var(--bg-border)"}
-            />
-          </div>
 
           <button
             onClick={handleSubmit}

@@ -1,5 +1,5 @@
 // components/LandingScreen.jsx
-// Pantalla principal de la landing — hero, métricas y planes de pricing
+// Pantalla principal de la landing — hero, beta social proof y planes de pricing
 
 import { useState } from "react";
 import { LogoSVG } from "./LogoSVG";
@@ -32,6 +32,24 @@ const PLANS = [
   { id: "agency", name: "Agency", price: "$299", period: " USD/mes", color: "#e879f9",
     features: ["100 análisis/mes", "25 posts listos", "20 directorios", "10 sitios web", "Manager dedicado", "API access — próximamente"],
     cta: "Activar Agency", limit: "Para agencias" },
+];
+
+// Tipos de negocio que ya están siendo validados
+const BUSINESS_TYPES = [
+  { icon: "🛒", label: "E-commerce" },
+  { icon: "💻", label: "SaaS" },
+  { icon: "🏥", label: "Health Tech" },
+  { icon: "🏪", label: "Negocios locales" },
+  { icon: "📣", label: "Agencias" },
+  { icon: "🎯", label: "Consultoría" },
+];
+
+// Qué genera el plan en números concretos
+const WHAT_YOU_GET = [
+  { color: "#38bdf8", num: "25",  label: "Posts listos",        sub: "para Instagram y Facebook" },
+  { color: "#4ade80", num: "12",  label: "Artículos SEO",       sub: "con estructura completa"   },
+  { color: "#f59e0b", num: "20",  label: "Directorios",         sub: "donde debes aparecer"      },
+  { color: "#e879f9", num: "10",  label: "Keywords primarias",  sub: "reales para tu nicho"      },
 ];
 
 export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth }) {
@@ -70,6 +88,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         onShowAuth={onShowAuth}
       />
 
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "100px 48px 60px", textAlign: "center", position: "relative", zIndex: 10 }}>
         <div style={{ display: "inline-flex", gap: "var(--space-2)", marginBottom: "var(--space-6)", flexWrap: "wrap", justifyContent: "center" }}>
           <Tag color="#4ade80">IA-Powered</Tag>
@@ -92,17 +111,65 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         <p style={{ fontSize: "var(--text-sm)", color: "var(--text-disabled)", marginTop: "var(--space-4)" }}>
           Gratis. Sin tarjeta. En 60 segundos.
         </p>
+      </div>
 
-        <div style={{ display: "flex", justifyContent: "center", gap: "var(--space-12)", marginTop: "var(--space-20)", flexWrap: "wrap" }}>
-          {[["10K+", "Sitios analizados"], ["3.2M", "Visitas generadas"], ["89%", "Mejora en SEO"], ["$0", "Para empezar"]].map(([num, label]) => (
-            <div key={label} style={{ textAlign: "center" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 32, background: "var(--gradient-accent)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{num}</div>
-              <div style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: "var(--space-1)" }}>{label}</div>
+      {/* ── QUÉ GENERA EL PLAN ───────────────────────────────────────── */}
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 48px 80px", position: "relative", zIndex: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "var(--space-4)" }}>
+          {WHAT_YOU_GET.map(({ color, num, label, sub }) => (
+            <div key={label} style={{ background: "var(--bg-surface)", border: `1px solid ${color}22`, borderRadius: "var(--radius-lg)", padding: "var(--space-5)", textAlign: "center" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 40, color, lineHeight: 1, marginBottom: "var(--space-2)" }}>{num}</div>
+              <div style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>{label}</div>
+              <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>{sub}</div>
             </div>
           ))}
         </div>
       </div>
 
+      {/* ── BETA SOCIAL PROOF ────────────────────────────────────────── */}
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 48px 80px", position: "relative", zIndex: 10 }}>
+        <div style={{ background: "var(--bg-surface)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-xl)", padding: "var(--space-8)", textAlign: "center" }}>
+
+          {/* Badge beta */}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.3)", borderRadius: "var(--radius-full)", padding: "6px 16px", marginBottom: "var(--space-5)" }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ade80", animation: "pulse 2s infinite" }} />
+            <span style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--brand-primary)", letterSpacing: 1, textTransform: "uppercase" }}>Beta privada activa</span>
+          </div>
+
+          <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-2xl)", marginBottom: "var(--space-3)", letterSpacing: -0.5 }}>
+            Siendo validado en negocios reales
+          </h3>
+          <p style={{ color: "var(--text-muted)", fontSize: "var(--text-base)", marginBottom: "var(--space-8)", maxWidth: 480, margin: "0 auto var(--space-8)" }}>
+            Actualmente validamos CAEVIK con negocios propios antes de abrir al público. Los primeros resultados determinarán los casos de éxito que publicaremos aquí.
+          </p>
+
+          {/* Tipos de negocio */}
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "var(--space-3)", marginBottom: "var(--space-8)" }}>
+            {BUSINESS_TYPES.map(({ icon, label }) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", background: "var(--bg-elevated)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-full)", padding: "8px 16px", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+                <span>{icon}</span>
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div style={{ borderTop: "1px solid var(--bg-border)", paddingTop: "var(--space-6)" }}>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginBottom: "var(--space-4)" }}>
+              Sé de los primeros en usar CAEVIK. El plan Free es permanentemente gratuito.
+            </p>
+            <button
+              onClick={onStart}
+              style={{ padding: "12px 32px", background: "var(--gradient-brand)", border: "none", borderRadius: "var(--radius-md)", color: "#fff", fontWeight: 700, fontSize: "var(--text-base)", cursor: "pointer", fontFamily: "var(--font-sans)" }}
+            >
+              Unirme a la beta gratis →
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── PLANES ───────────────────────────────────────────────────── */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 80px", position: "relative", zIndex: 10 }}>
         <h2 style={{ textAlign: "center", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-3xl)", marginBottom: "var(--space-12)", letterSpacing: -1 }}>
           Planes que escalan contigo
@@ -137,6 +204,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
           ))}
         </div>
       </div>
+
     </div>
   );
 }

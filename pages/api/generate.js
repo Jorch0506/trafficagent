@@ -10,9 +10,9 @@ const supabase = createClient(
 
 const PLAN_LIMITS = {
   free:    { posts: 2,  articulos: 1,  directorios: 1,  keywordsPrimarias: 3,  keywordsLongTail: 1,  acciones: 3,  analyses: 1   },
-  starter: { posts: 10, articulos: 5,  directorios: 5,  keywordsPrimarias: 5,  keywordsLongTail: 3,  acciones: 5,  analyses: 20  },
-  growth:  { posts: 25, articulos: 12, directorios: 15, keywordsPrimarias: 10, keywordsLongTail: 8,  acciones: 10, analyses: 60  },
-  agency:  { posts: 25, articulos: 12, directorios: 20, keywordsPrimarias: 10, keywordsLongTail: 8,  acciones: 10, analyses: 100 },
+  starter: { posts: 8,  articulos: 4,  directorios: 5,  keywordsPrimarias: 5,  keywordsLongTail: 3,  acciones: 5,  analyses: 20  },
+  growth:  { posts: 12, articulos: 6,  directorios: 10, keywordsPrimarias: 8,  keywordsLongTail: 5,  acciones: 8,  analyses: 60  },
+  agency:  { posts: 15, articulos: 8,  directorios: 12, keywordsPrimarias: 10, keywordsLongTail: 6,  acciones: 8,  analyses: 100 },
 };
 
 const BUSINESS_TYPE_TO_NICHE = {

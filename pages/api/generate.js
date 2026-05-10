@@ -209,6 +209,30 @@ Genera:
                   plan_data: planData,
                 });
                 await supabase.rpc("increment_analyses_used", { user_id: userId });
+
+                // Enviar warning al llegar al 80% del límite
+                const newUsed = (user?.analyses_used || 0) + 1;
+                const usagePct = (newUsed / (user?.analyses_limit || 1)) * 100;
+                if (usagePct >= 80 && usagePct < 100) {
+                  const { data: userData } = await supabase
+                    .from("users")
+                    .select("email")
+                    .eq("id", userId)
+                    .single();
+                  if (userData?.email) {
+                    fetch("https://www.caevik.com/api/send-email", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        type: "limit_warning",
+                        to: userData.email,
+                        plan: userPlan,
+                        used: newUsed,
+                        limit: user?.analyses_limit,
+                      }),
+                    }).catch(e => console.error("Warning email error:", e));
+                  }
+                }
               }
 
               // Enviar el plan completo al final

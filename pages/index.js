@@ -10,6 +10,7 @@ import { LandingScreen } from "../components/LandingScreen";
 import { GeneratorForm } from "../components/GeneratorForm";
 import { ResultsPanel } from "../components/ResultsPanel";
 import { DashboardHome } from "../components/DashboardHome";
+import { OnboardingTooltip } from "../components/OnboardingTooltip";
 
 const ERRORS = {
   LIMIT_REACHED: (plan, limit) => ({
@@ -44,7 +45,7 @@ export default function Home() {
   const [streamText, setStreamText] = useState("");
   const intervalRef = useRef(null);
 
-  const { user, userData, userPlan, logout } = useAuth();
+  const { user, userData, userPlan, logout, onboardingDone, markOnboardingComplete } = useAuth();
 
   const handleFormSubmit = async (data) => {
     setFormData(data);
@@ -165,6 +166,13 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
+
+      {!onboardingDone && user && (
+        <OnboardingTooltip
+          userId={user.id}
+          onComplete={markOnboardingComplete}
+        />
+      )}
 
       {showAuth && (
         <AuthModal

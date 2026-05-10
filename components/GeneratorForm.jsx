@@ -1,7 +1,7 @@
 // components/GeneratorForm.jsx
-// Formulario de análisis con validación de URL y estados de error inline
+// Formulario de análisis con URL pre-cargable desde sitios registrados
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogoSVG } from "./LogoSVG";
 
 function GlowOrb({ x, y, color = "#38bdf8", size = 300, opacity = 0.12 }) {
@@ -20,15 +20,22 @@ function isValidUrl(str) {
   }
 }
 
-export function GeneratorForm({ onSubmit, loading, error, onClearError }) {
+export function GeneratorForm({ onSubmit, loading, error, onClearError, initialUrl, onBack, user }) {
   const [form, setForm] = useState({
-    url: "",
+    url: initialUrl || "",
     instagram: "",
     facebook: "",
     businessType: "general",
     description: "",
   });
   const [urlError, setUrlError] = useState("");
+
+  // Actualizar URL si cambia initialUrl (cuando se hace clic en "Analizar" desde sitios)
+  useEffect(() => {
+    if (initialUrl) {
+      setForm(f => ({ ...f, url: initialUrl }));
+    }
+  }, [initialUrl]);
 
   const update = (k, v) => {
     setForm(f => ({ ...f, [k]: v }));
@@ -70,6 +77,17 @@ export function GeneratorForm({ onSubmit, loading, error, onClearError }) {
       <GlowOrb x="60%" y="60%" color="var(--brand-accent)" size={300} opacity={0.06} />
 
       <div style={{ width: "100%", maxWidth: 540, position: "relative", zIndex: 10 }}>
+
+        {/* Botón de regreso — solo si hay usuario logueado */}
+        {(onBack || user) && (
+          <button
+            onClick={onBack}
+            style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", background: "transparent", border: "none", color: "var(--text-muted)", fontSize: "var(--text-sm)", cursor: "pointer", fontFamily: "var(--font-sans)", marginBottom: "var(--space-6)", padding: 0 }}
+          >
+            ← Volver al dashboard
+          </button>
+        )}
+
         <div style={{ textAlign: "center", marginBottom: "var(--space-10)" }}>
           <LogoSVG id="form-logo" width={260} height={68} />
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-2xl)", letterSpacing: -1, marginBottom: "var(--space-2)", marginTop: "var(--space-4)" }}>
@@ -126,7 +144,7 @@ export function GeneratorForm({ onSubmit, loading, error, onClearError }) {
             )}
           </div>
 
-          {/* Tipo de negocio — va antes de los opcionales para dar contexto */}
+          {/* Tipo de negocio */}
           <div style={{ marginBottom: "var(--space-5)" }}>
             <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "var(--space-2)" }}>
               🏢 Tipo de negocio <span style={{ color: "var(--brand-danger)" }}>*</span>
@@ -147,7 +165,7 @@ export function GeneratorForm({ onSubmit, loading, error, onClearError }) {
             </select>
           </div>
 
-          {/* Descripción — más prominente para mejorar la calidad del plan */}
+          {/* Descripción */}
           <div style={{ marginBottom: "var(--space-5)" }}>
             <label style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "var(--space-2)" }}>
               📝 Describe tu negocio
@@ -164,7 +182,7 @@ export function GeneratorForm({ onSubmit, loading, error, onClearError }) {
             />
           </div>
 
-          {/* Campos opcionales de redes sociales */}
+          {/* Redes sociales */}
           {[
             { key: "instagram", label: "📸 Instagram (opcional)", placeholder: "@tuusuario" },
             { key: "facebook",  label: "📘 Facebook (opcional)",  placeholder: "facebook.com/tupagina" },

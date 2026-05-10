@@ -35,11 +35,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "URL requerida" });
   }
 
-  // Determinar plan del usuario
   let userPlan = "free";
+  let user = null;
 
   if (userId) {
-    const { data: user, error } = await supabase
+    const { data: userData, error } = await supabase
       .from("users")
       .select("plan, analyses_used, analyses_limit, subscription_status")
       .eq("id", userId)
@@ -50,25 +50,25 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "Error consultando usuario", detail: error.message });
     }
 
-    if (!user) {
+    if (!userData) {
       return res.status(403).json({ error: "Usuario no encontrado" });
     }
 
-    if (user.analyses_used >= user.analyses_limit) {
+    if (userData.analyses_used >= userData.analyses_limit) {
       return res.status(403).json({
         error: "limite_alcanzado",
-        plan: user.plan,
-        used: user.analyses_used,
-        limit: user.analyses_limit,
+        plan: userData.plan,
+        used: userData.analyses_used,
+        limit: userData.analyses_limit,
       });
     }
 
-    userPlan = user.plan || "free";
+    user = userData;
+    userPlan = userData.plan || "free";
   }
 
   const limits = PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
 
-  // Detección de nicho — tipo seleccionado tiene prioridad
   let niche = BUSINESS_TYPE_TO_NICHE[businessType] || "general";
 
   if (niche === "general") {
@@ -85,16 +85,21 @@ export default async function handler(req, res) {
     }
   }
 
-  const systemPrompt = `Eres un experto en marketing digital, SEO, y generacion de trafico organico para negocios latinoamericanos.
+  const systemPrompt = `Eres un experto en marketing digital y SEO para negocios latinoamericanos.
 Genera un plan de trafico REAL y ESPECIFICO basado en la informacion del negocio.
-Responde UNICAMENTE en JSON valido, sin markdown, sin backticks, sin texto extra.
+Responde UNICAMENTE en JSON valido, sin markdown, sin backticks, sin texto extra antes o despues.
 
-IMPORTANTE:
+REGLAS ESTRICTAS PARA EVITAR JSON LARGO:
+- caption de posts: maximo 200 caracteres
+- metaDescription: maximo 120 caracteres
+- estructura de articulos: exactamente 3 strings H2
+- hashtags: exactamente 3 hashtags por post
+- palabrasClave de articulos: exactamente 2 keywords
 - potencialCrecimiento: maximo 4 palabras
-- competencia.nivel: maximo 2 palabras  
+- competencia.nivel: maximo 2 palabras
 - competencia.oportunidad: maximo 8 palabras
+- accionesInmediatas: maximo 80 caracteres cada una
 - Genera EXACTAMENTE el numero de items indicado en cada array
-- El plan debe ser 100% especifico para el tipo de negocio y nicho indicado
 
 El JSON debe tener EXACTAMENTE esta estructura:
 {
@@ -111,32 +116,29 @@ El JSON debe tener EXACTAMENTE esta estructura:
   "potencialCrecimiento": "string maximo 4 palabras"
 }
 
-Para posts: {"red": "Instagram" o "Facebook", "tipo": "string", "titulo": "string", "caption": "string", "hashtags": ["#h1","#h2","#h3"]}
-Para articulosSEO: {"titulo": "string", "slug": "string", "metaDescription": "string", "palabrasClave": ["kw1","kw2"], "estructura": ["H2: string", "H2: string"]}
+Para posts: {"red": "Instagram" o "Facebook", "tipo": "string", "titulo": "string", "caption": "string max 200 chars", "hashtags": ["#h1","#h2","#h3"]}
+Para articulosSEO: {"titulo": "string", "slug": "string", "metaDescription": "string max 120 chars", "palabrasClave": ["kw1","kw2"], "estructura": ["H2: string", "H2: string", "H2: string"]}
 Para directorios: {"nombre": "string", "url": "string", "prioridad": "Alta" o "Media" o "Baja"}`;
 
-  const prompt = `Analiza este negocio y genera su plan de trafico organico completo:
+  const prompt = `Analiza este negocio y genera su plan de trafico organico:
 
 URL: ${url}
 Instagram: ${instagram || "No tiene"}
 Facebook: ${facebook || "No tiene"}
-Tipo de negocio: ${businessType || "general"}
-Descripcion: ${description || "Sin descripcion adicional"}
-Nicho detectado: ${niche}
-Plan del usuario: ${userPlan}
+Tipo: ${businessType || "general"}
+Descripcion: ${description || "Sin descripcion"}
+Nicho: ${niche}
+Plan: ${userPlan}
 
-IMPORTANTE: El plan debe ser completamente especifico para el nicho "${niche}".
-
-Genera:
-- ${limits.keywordsPrimarias} keywords primarias REALES para este nicho
-- ${limits.keywordsLongTail} keywords long tail especificas
-- ${limits.posts} posts con captions REALES listos para publicar
-- ${limits.articulos} articulos SEO con estructura real
-- ${limits.directorios} directorios donde REALMENTE debe aparecer este negocio
-- ${limits.acciones} acciones inmediatas prioritarias`;
+Genera exactamente:
+- ${limits.keywordsPrimarias} keywords primarias
+- ${limits.keywordsLongTail} keywords long tail
+- ${limits.posts} posts (captions max 200 chars cada uno)
+- ${limits.articulos} articulos SEO (3 H2 cada uno)
+- ${limits.directorios} directorios
+- ${limits.acciones} acciones inmediatas`;
 
   try {
-    // Llamada a Anthropic con streaming activado
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -159,7 +161,6 @@ Genera:
       return res.status(500).json({ error: "Error en la API de Anthropic", detail: errData });
     }
 
-    // Configurar headers para streaming SSE
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
@@ -184,24 +185,23 @@ Genera:
         try {
           const parsed = JSON.parse(data);
 
-          // Extraer texto del delta
           if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
             const text = parsed.delta.text;
             fullText += text;
-            // Enviar cada chunk al frontend
             res.write(`data: ${JSON.stringify({ type: "chunk", text })}\n\n`);
           }
 
-          // Señal de fin de stream
           if (parsed.type === "message_stop") {
             try {
+              // FIX: limpiar y extraer solo el bloque JSON válido
               const clean = fullText.replace(/```json|```/g, "").trim();
-              const planData = JSON.parse(clean);
+              const jsonMatch = clean.match(/\{[\s\S]*\}/);
+              if (!jsonMatch) throw new Error("No se encontró JSON válido en la respuesta");
 
+              const planData = JSON.parse(jsonMatch[0]);
               planData._plan = userPlan;
               planData._limits = limits;
 
-              // Guardar en historial e incrementar contador
               if (userId) {
                 await supabase.from("analyses").insert({
                   user_id: userId,
@@ -210,7 +210,6 @@ Genera:
                 });
                 await supabase.rpc("increment_analyses_used", { user_id: userId });
 
-                // Enviar warning al llegar al 80% del límite
                 const newUsed = (user?.analyses_used || 0) + 1;
                 const usagePct = (newUsed / (user?.analyses_limit || 1)) * 100;
                 if (usagePct >= 80 && usagePct < 100) {
@@ -235,10 +234,11 @@ Genera:
                 }
               }
 
-              // Enviar el plan completo al final
               res.write(`data: ${JSON.stringify({ type: "done", plan: planData })}\n\n`);
             } catch (parseErr) {
-              console.error("Error parseando JSON:", parseErr);
+              console.error("Error parseando JSON:", parseErr.message);
+              console.error("Primeros 500 chars del texto:", fullText.substring(0, 500));
+              console.error("Ultimos 500 chars del texto:", fullText.substring(fullText.length - 500));
               res.write(`data: ${JSON.stringify({ type: "error", message: "Error al procesar el plan generado" })}\n\n`);
             }
             res.end();

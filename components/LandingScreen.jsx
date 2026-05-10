@@ -151,14 +151,14 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       <Header user={user} userPlan={userPlan} onLogout={onLogout} onStart={onStart} onShowAuth={onShowAuth} />
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 48px 80px", position: "relative", zIndex: 10 }}>
+      <section className="hero-section" style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 48px 80px", position: "relative", zIndex: 10 }}>
 
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)", borderRadius: 999, padding: "6px 16px", marginBottom: 40 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block", boxShadow: "0 0 8px #4ade80", animation: "pulse 2s infinite" }} />
           <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#94a3b8", textTransform: "uppercase" }}>Beta privada activa — acceso gratuito hoy</span>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 60, alignItems: "start" }}>
+        <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 60, alignItems: "start" }}>
           <div>
             <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(42px, 5.5vw, 72px)", lineHeight: 1.05, letterSpacing: -3, marginBottom: 28 }}>
               <span style={{ display: "block", color: "#f1f5f9" }}>Tráfico orgánico</span>
@@ -206,7 +206,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
           </div>
 
           {/* Panel derecho */}
-          <GlassCard style={{ padding: 28, marginTop: 8 }}>
+          <GlassCard className="hero-panel" style={{ padding: 28, marginTop: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#38bdf8", textTransform: "uppercase", marginBottom: 20 }}>Generando plan para</div>
             <div style={{ height: 36, overflow: "hidden", position: "relative", marginBottom: 20 }}>
               {NICHES.map((n, i) => (
@@ -233,19 +233,19 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       </section>
 
       {/* ── CÓMO FUNCIONA ────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
+      <section className="section-pad" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Así de simple</h2>
           <p style={{ fontSize: 15, color: "#475569" }}>Sin configuración. Sin curva de aprendizaje.</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+        <div className="steps-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
           {STEPS.map((s, i) => (
             <GlassCard key={s.n} style={{ padding: "36px 28px", position: "relative" }}>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 48, color: "rgba(56,189,248,0.12)", lineHeight: 1, marginBottom: 20, letterSpacing: -2 }}>{s.n}</div>
               <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 10, color: "#f1f5f9" }}>{s.title}</div>
               <div style={{ fontSize: 14, color: "#64748b", lineHeight: 1.7 }}>{s.desc}</div>
               {i < 2 && (
-                <div style={{ position: "absolute", right: -12, top: "50%", transform: "translateY(-50%)", color: "#1e293b", fontSize: 20, zIndex: 2 }}>→</div>
+                <div className="steps-arrow" style={{ position: "absolute", right: -12, top: "50%", transform: "translateY(-50%)", color: "#1e293b", fontSize: 20, zIndex: 2 }}>→</div>
               )}
             </GlassCard>
           ))}
@@ -253,7 +253,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       </section>
 
       {/* ── QUÉ INCLUYE EL PLAN ───────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
+      <section className="section-pad" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Un plan completo, listo para publicar</h2>
           <p style={{ fontSize: 15, color: "#475569" }}>No es solo información — es contenido listo para copiar y publicar hoy.</p>
@@ -277,9 +277,9 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       </section>
 
       {/* ── PARA QUIÉN ES ────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
-        <GlassCard style={{ padding: "56px 64px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+      <section className="section-pad" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
+        <GlassCard style={{ padding: "56px 64px" }} className="glass-who">
+          <div className="who-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
             <div>
               <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 34, letterSpacing: -1, marginBottom: 20, lineHeight: 1.2 }}>
                 ¿Para quién es CAEVIK?
@@ -321,12 +321,12 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
-      <section id="pricing" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
+      <section id="pricing" className="section-pad" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Planes que escalan contigo</h2>
           <p style={{ fontSize: 15, color: "#475569" }}>Empieza gratis. Escala cuando estés listo. Cancela cuando quieras.</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+        <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
           {PLANS.map(plan => (
             <div
               key={plan.id}
@@ -395,7 +395,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 720, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
+      <section className="section-pad" style={{ maxWidth: 720, margin: "0 auto", padding: "0 48px 100px", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 38, letterSpacing: -1.5, marginBottom: 12 }}>Preguntas frecuentes</h2>
         </div>
@@ -424,7 +424,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
 
       {/* ── CTA FINAL ────────────────────────────────────────────────────── */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 120px", position: "relative", zIndex: 10 }}>
-        <div style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))", border: "1px solid rgba(56,189,248,0.15)", borderRadius: 24, padding: "80px 64px", textAlign: "center" }}>
+        <div className="cta-section" style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06))", border: "1px solid rgba(56,189,248,0.15)", borderRadius: 24, padding: "80px 64px", textAlign: "center" }}>
           <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 44, letterSpacing: -2, marginBottom: 16, lineHeight: 1.1 }}>
             Tu competencia ya<br />está generando tráfico.
           </h2>
@@ -469,6 +469,22 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
         @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 8px #4ade80} 50%{opacity:0.6;box-shadow:0 0 4px #4ade80} }
+        
+        @media (max-width: 768px) {
+          .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .hero-panel { display: none !important; }
+          .steps-grid { grid-template-columns: 1fr !important; }
+          .steps-arrow { display: none !important; }
+          .deliverables-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+          .who-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .includes-grid { grid-template-columns: 1fr !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+          .beta-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .section-pad { padding-left: 20px !important; padding-right: 20px !important; }
+          .hero-section { padding: 80px 20px 60px !important; }
+          .cta-section { padding: 48px 24px !important; }
+          .glass-who { padding: 32px 24px !important; }
+        }
       `}</style>
     </div>
   );

@@ -2,9 +2,9 @@
 // Crea una sesión de pago en Stripe y redirige al checkout
 
 const PRICE_IDS = {
-  starter: "price_1TSH9gJK0PaCWmjf2j4Hq5DC",
-  growth: "price_1TSHAWJK0PaCWmjfHRUHo0eF",
-  agency: "price_1TSHBMJK0PaCWmjf0PMaLQiw",
+  starter: "price_1TVcxnJK0PaCWmjfm8RbZtsE",  // $699 MXN/mes
+  growth:  "price_1TVcypJK0PaCWmjfgzYwv67U",  // $1,999 MXN/mes
+  agency:  "price_1TVd03JK0PaCWmjfRF4Ws6WZ",  // $5,999 MXN/mes
 };
 
 export default async function handler(req, res) {
@@ -13,13 +13,11 @@ export default async function handler(req, res) {
   }
 
   const { plan } = req.body;
-
   if (!PRICE_IDS[plan]) {
     return res.status(400).json({ error: "Plan inválido" });
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
   if (!stripeSecretKey) {
     return res.status(500).json({ error: "Stripe no configurado" });
   }

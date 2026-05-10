@@ -54,7 +54,6 @@ function GlassCard({ children, style = {}, className = "" }) {
   );
 }
 
-// ── SOLO ESTO CAMBIÓ: precios en MXN ─────────────────────────────────────────
 const PLANS = [
   {
     id: "free", name: "Free", price: "$0", period: "",
@@ -67,21 +66,21 @@ const PLANS = [
     id: "starter", name: "Starter", price: "$699", period: "MXN/mes",
     color: "#38bdf8", gradient: "linear-gradient(135deg, #38bdf8, #818cf8)",
     label: "Para emprendedores",
-    features: ["20 análisis / mes", "10 posts listos", "5 artículos SEO", "5 directorios", "Soporte email"],
+    features: ["20 análisis / mes", "8 posts listos", "4 artículos SEO", "5 directorios", "Soporte email"],
     cta: "Activar Starter",
   },
   {
     id: "growth", name: "Growth", price: "$1,999", period: "MXN/mes",
     color: "#f59e0b", gradient: "linear-gradient(135deg, #f59e0b, #ef4444)",
     label: "Para negocios", popular: true,
-    features: ["60 análisis / mes", "25 posts listos", "12 artículos SEO", "3 sitios web", "10 keywords primarias"],
+    features: ["60 análisis / mes", "12 posts listos", "6 artículos SEO", "10 directorios", "8 keywords primarias"],
     cta: "Activar Growth",
   },
   {
     id: "agency", name: "Agency", price: "$5,999", period: "MXN/mes",
     color: "#e879f9", gradient: "linear-gradient(135deg, #e879f9, #818cf8)",
     label: "Para agencias",
-    features: ["100 análisis / mes", "10 sitios web", "20 directorios", "Manager dedicado", "API próximamente"],
+    features: ["100 análisis / mes", "15 posts listos", "8 artículos SEO", "12 directorios", "Manager dedicado"],
     cta: "Activar Agency",
   },
 ];
@@ -184,6 +183,7 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
             </div>
           </div>
 
+          {/* Panel hero — números actualizados */}
           <GlassCard className="hero-panel" style={{ padding: 28, marginTop: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: "#38bdf8", textTransform: "uppercase", marginBottom: 20 }}>Generando plan para</div>
             <div style={{ height: 36, overflow: "hidden", position: "relative", marginBottom: 20 }}>
@@ -192,7 +192,12 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
               ))}
             </div>
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              {[{ n: "25", label: "Posts sociales", color: "#38bdf8" }, { n: "12", label: "Artículos SEO", color: "#4ade80" }, { n: "20", label: "Directorios", color: "#f59e0b" }, { n: "10", label: "Keywords", color: "#e879f9" }].map(d => (
+              {[
+                { n: "15", label: "Posts sociales", color: "#38bdf8" },
+                { n: "8",  label: "Artículos SEO",  color: "#4ade80" },
+                { n: "12", label: "Directorios",    color: "#f59e0b" },
+                { n: "10", label: "Keywords",       color: "#e879f9" },
+              ].map(d => (
                 <div key={d.label}>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, color: d.color, lineHeight: 1 }}>{d.n}</div>
                   <div style={{ fontSize: 11, color: "#475569", marginTop: 3 }}>{d.label}</div>
@@ -229,10 +234,10 @@ export function LandingScreen({ onStart, user, userPlan, onLogout, onShowAuth })
         </div>
         <div className="includes-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
           {[
-            { icon: "📱", title: "Posts para Instagram y Facebook", desc: "Hasta 25 posts con caption completo, hashtags optimizados y tipo de contenido (educativo, testimonial, viral). Solo copia y publica.", color: "#38bdf8" },
-            { icon: "✍️", title: "Artículos de blog SEO", desc: "Hasta 12 artículos con título, meta descripción, estructura H2 y palabras clave integradas. Diseñados para posicionar en Google.", color: "#4ade80" },
+            { icon: "📱", title: "Posts para Instagram y Facebook", desc: "Hasta 15 posts con caption completo, hashtags optimizados y tipo de contenido (educativo, testimonial, viral). Solo copia y publica.", color: "#38bdf8" },
+            { icon: "✍️", title: "Artículos de blog SEO", desc: "Hasta 8 artículos con título, meta descripción, estructura H2 y palabras clave integradas. Diseñados para posicionar en Google.", color: "#4ade80" },
             { icon: "🔑", title: "Keywords primarias y long tail", desc: "Las palabras clave exactas que buscan tus clientes. Primarias para autoridad, long tail para tráfico rápido.", color: "#e879f9" },
-            { icon: "📍", title: "Directorios donde registrarte", desc: "Hasta 20 directorios relevantes para tu nicho con prioridad alta, media o baja. Backlinks gratis para tu sitio.", color: "#f59e0b" },
+            { icon: "📍", title: "Directorios donde registrarte", desc: "Hasta 12 directorios relevantes para tu nicho con prioridad alta, media o baja. Backlinks gratis para tu sitio.", color: "#f59e0b" },
           ].map(item => (
             <GlassCard key={item.title} style={{ padding: "32px 28px", display: "flex", gap: 20, alignItems: "flex-start" }}>
               <div style={{ fontSize: 32, flexShrink: 0, lineHeight: 1 }}>{item.icon}</div>

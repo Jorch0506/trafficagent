@@ -1,10 +1,11 @@
 // components/DashboardHome.jsx
-// Pantalla de bienvenida para usuarios logueados
-// Incluye historial de análisis recientes
+// Pantalla principal del usuario logueado
+// Incluye: estado del plan, historial de análisis y gestión de sitios
 
 import { useState, useEffect } from "react";
 import { supabase } from "../hooks/useAuth";
 import { LogoSVG } from "./LogoSVG";
+import { SitesManager } from "./SitesManager";
 
 function GlowOrb({ x, y, color = "#38bdf8", size = 300, opacity = 0.12 }) {
   return (
@@ -46,7 +47,7 @@ function getFavicon(url) {
   }
 }
 
-export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan }) {
+export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan, onAnalyzeSite }) {
   const [analyses, setAnalyses] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
 
@@ -141,9 +142,7 @@ export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan })
 
           {/* Card uso */}
           <div style={{ background: "var(--bg-surface)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-xl)", padding: "var(--space-6)" }}>
-            <div style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--text-muted)", letterSpacing: 1, textTransform: "uppercase", marginBottom: "var(--space-4)" }}>
-              Uso este mes
-            </div>
+            <div style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--text-muted)", letterSpacing: 1, textTransform: "uppercase", marginBottom: "var(--space-4)" }}>Uso este mes</div>
             <div style={{ display: "flex", alignItems: "baseline", gap: "var(--space-1)", marginBottom: "var(--space-3)" }}>
               <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-3xl)", color: isAtLimit ? "var(--brand-danger)" : isNearLimit ? "var(--brand-warning)" : planColor }}>
                 {used}
@@ -162,9 +161,7 @@ export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan })
 
           {/* Card plan */}
           <div style={{ background: `linear-gradient(135deg, ${planColor}12, var(--bg-surface))`, border: `1px solid ${planColor}30`, borderRadius: "var(--radius-xl)", padding: "var(--space-6)" }}>
-            <div style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--text-muted)", letterSpacing: 1, textTransform: "uppercase", marginBottom: "var(--space-4)" }}>
-              Tu plan actual
-            </div>
+            <div style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--text-muted)", letterSpacing: 1, textTransform: "uppercase", marginBottom: "var(--space-4)" }}>Tu plan actual</div>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--text-2xl)", color: planColor, marginBottom: "var(--space-2)", textTransform: "capitalize" }}>
               {plan}
             </div>
@@ -204,16 +201,19 @@ export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan })
           )}
         </div>
 
+        {/* Gestión de sitios */}
+        <SitesManager
+          user={user}
+          userPlan={plan}
+          onAnalyzeSite={onAnalyzeSite}
+        />
+
         {/* Historial de análisis */}
-        <div>
+        <div style={{ marginTop: "var(--space-8)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "var(--text-lg)" }}>
-              Análisis recientes
-            </h3>
+            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "var(--text-lg)" }}>Análisis recientes</h3>
             {analyses.length > 0 && (
-              <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
-                {analyses.length} {analyses.length === 1 ? "análisis" : "análisis"}
-              </span>
+              <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>{analyses.length} análisis</span>
             )}
           </div>
 
@@ -231,10 +231,8 @@ export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan })
             <div style={{ display: "grid", gap: "var(--space-2)" }}>
               {analyses.map((analysis) => {
                 const favicon = getFavicon(analysis.site_url);
-                const planData = analysis.plan_data;
-                const analysisPlan = planData?._plan || "free";
+                const analysisPlan = analysis.plan_data?._plan || "free";
                 const planCol = PLAN_COLORS[analysisPlan] || "#38bdf8";
-
                 return (
                   <div key={analysis.id} style={{ background: "var(--bg-surface)", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-4) var(--space-5)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--space-4)", flexWrap: "wrap" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", flex: 1, minWidth: 0 }}>
@@ -254,10 +252,7 @@ export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan })
                       <span style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: planCol, background: planCol + "18", padding: "3px 10px", borderRadius: "var(--radius-full)", border: `1px solid ${planCol}33`, textTransform: "uppercase", letterSpacing: 1 }}>
                         {analysisPlan}
                       </span>
-                      <button
-                        onClick={() => onViewPlan(analysis.id, analysis.plan_data)}
-                        style={{ padding: "8px 16px", background: "transparent", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)", whiteSpace: "nowrap" }}
-                      >
+                      <button onClick={() => onViewPlan(analysis.id, analysis.plan_data)} style={{ padding: "8px 16px", background: "transparent", border: "1px solid var(--bg-border)", borderRadius: "var(--radius-sm)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)", whiteSpace: "nowrap" }}>
                         Ver plan →
                       </button>
                     </div>

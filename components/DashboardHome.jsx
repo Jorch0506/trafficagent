@@ -108,6 +108,24 @@ export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan, o
     if (data.url) window.location.href = data.url;
   };
 
+  const handleManagePlan = async () => {
+    try {
+      const res = await fetch("/api/customer-portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.error === "no_customer") {
+        alert("No tienes una suscripción activa. Activa un plan para gestionar tu facturación.");
+      }
+    } catch {
+      alert("Error de conexión. Intenta de nuevo.");
+    }
+  };
+
   if (!userData) {
     return (
       <div style={{ minHeight: "100vh", background: "#03060f", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -137,6 +155,16 @@ export function DashboardHome({ user, userData, onStart, onLogout, onViewPlan, o
           }}>
             {plan}
           </span>
+          {plan !== "free" && (
+            <button
+              onClick={handleManagePlan}
+              style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, color: "#475569", fontSize: 12, padding: "7px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = `${planColor}44`; e.currentTarget.style.color = planColor; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "#475569"; }}
+            >
+              Gestionar plan →
+            </button>
+          )}
           <button
             onClick={onLogout}
             style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, color: "#334155", fontSize: 12, padding: "7px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s" }}
